@@ -33,10 +33,10 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Test
-        run: cargo test
+        run: cargo test --target aarch64-unknown-linux-gnu
 
       - name: Build
-        run: cargo build --release
+        run: cargo build --release --target aarch64-unknown-linux-gnu
 
       - name: Package application
         if: env.IS_LIB == 'false'
