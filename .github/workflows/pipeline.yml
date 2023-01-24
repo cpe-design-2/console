@@ -10,7 +10,9 @@ env:
   # the name of the compiled executable
   APP: goco
   # the path to the compiled executable
-  APP_PATH: ./target/aarch64-unknown-linux-gnu/release
+  APP_PATH: ./target/aarch64-unknown-linux-musl/release
+
+  TARGET_TRIPLE: aarch64-unknown-linux-musl
 
 jobs:
   build:
@@ -27,7 +29,7 @@ jobs:
         with:
           toolchain: stable
           # install the target for the RPi3
-          targets: aarch64-unknown-linux-gnu
+          targets: ${{ env.TARGET_TRIPLE }}
 
       - name: Install linker
         run: sudo apt-get install gcc-aarch64-linux-gnu
@@ -39,7 +41,7 @@ jobs:
         run: cargo test # --target aarch64-unknown-linux-gnu
 
       - name: Build
-        run: cargo build --release --target aarch64-unknown-linux-gnu
+        run: cargo build --release --target ${{ env.TARGET_TRIPLE }}
 
       - name: Package application
         if: env.IS_LIB == 'false'
