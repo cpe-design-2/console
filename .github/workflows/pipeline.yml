@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Fetch repository
         uses: actions/checkout@v3
-          
+
       - name: Configure Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
@@ -29,8 +29,8 @@ jobs:
           # install the target for the RPi3
           targets: aarch64-unknown-linux-gnu
 
-      # - name: Install linker
-      #   run: sudo apt-get install gcc-aarch64-linux-gnu
+      - name: Install linker
+        run: sudo apt-get install gcc-aarch64-linux-gnu
 
       - name: Enable Cargo caching
         uses: Swatinem/rust-cache@v2
