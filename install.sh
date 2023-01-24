@@ -42,7 +42,7 @@ cd ..
 scons platform=frt tools=no target=release use_llvm=yes -j 4 module_webm_enabled=no
 
 # place the compiled executable in a known path
-
+# binary -> ./bin/godot.frt.opt.llvm
 
 
 # 2) UPDATE .BASHRC
