@@ -1,0 +1,62 @@
+name: Pipeline
+on:
+  push:
+
+env:
+  # the crate's name
+  TARGET: goco # godoco? goko? gc? goconsole?
+  # determine if to upload the executable as an artifact
+  IS_LIB: false
+  # the name of the compiled executable
+  APP: goco
+  # the path to the compiled executable
+  APP_PATH: ./target/aarch64-unknown-linux-gnu/release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Fetch repository
+        uses: actions/checkout@v3
+          
+      - name: Configure Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          # install the target for the RPi3
+          targets: aarch64-unknown-linux-gnu
+
+      - name: Enable Cargo caching
+        uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: cargo test
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Package application
+        if: env.IS_LIB == 'false'
+        run: |
+          # copy files and produce compressed archive for distribution
+          import shutil, os
+          target = '${{ env.TARGET }}-${{ github.ref_name }}'
+          print(target)
+          # create intermediate artifact directory
+          os.makedirs(target)
+          # copy the executable into the final directory
+          shutil.copy2('${{ env.APP_PATH }}/${{ env.APP }}${{ matrix.ext }}', target+'/${{ env.APP }}${{ matrix.ext }}')
+          # compress the final directory
+          shutil.make_archive(target, 'zip', root_dir='.', base_dir=target)
+        shell: python
+
+      - name: Upload artifact
+        if: env.IS_LIB == 'false'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.TARGET }}-${{ github.ref_name }}
+          path: ./${{ env.TARGET }}-${{ github.ref_name }}.zip
+          if-no-files-found: error
