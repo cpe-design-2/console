@@ -29,11 +29,15 @@ FRT_VERSION="2.0"
 # install dependencis for godot
 sudo apt-get install git build-essential scons pkg-config clang llvm lld libsdl2-dev libgles2-mesa-dev
 
-# clone the godot repository at the specified version (tag)
-git clone -b $GODOT_VERSION https://github.com/godotengine/godot.git ./godot
+# download the zipped source code
+curl -LO https://github.com/godotengine/godot/archive/refs/tags/$GODOT_VERSION.zip
+# unzip the archive
+tar -xf $GODOT_VERSION.zip
+# remove the compressed archive
+rm $GODOT_VERSION.zip
 
 # add the FRT paltform for the RPi3
-cd ./godot/platform
+cd ./godot-$GODOT_VERSION/platform
 git clone -b $FRT_VERSION https://github.com/efornara/frt
 # return to godot's base folder
 cd ..
@@ -46,3 +50,9 @@ scons platform=frt tools=no target=release use_llvm=yes -j 4 module_webm_enabled
 
 
 # 2) UPDATE .BASHRC
+
+
+# 3) DOWNLOAD THE GOCO COMPILED EXECUTABLE
+
+
+# 4) EDIT "/etc/rc.local" TO ALLOW GOCO PROGRAM TO START-UP
