@@ -21,16 +21,20 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
-    container:
-      image: arm64v8/ubuntu:20.04
-      options: --platform linux/arm64
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
     steps:
       - name: Fetch repository
         uses: actions/checkout@v3
+
+      - name: Configure RPi-OS
+        uses: pguyot/arm-runner-action@v2
+        id: build_image
+        with: raspios_lite:2022-04-04
+        commands: |
+          echo "hello world"
 
       - name: Configure Rust toolchain
         uses: dtolnay/rust-toolchain@master
