@@ -17,6 +17,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Enable Cargo caching
+        uses: Swatinem/rust-cache@v2
+
       - name: Build artifact  
         uses: uraimo/run-on-arch-action@v2
         id: build
@@ -39,6 +42,7 @@ jobs:
           # Pass some environment variables to the container
           env: | # YAML, but pipe character is necessary
             artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+            RUST_BACKTRACE: 1
 
           # The shell to run commands with in the container
           shell: /bin/bash
@@ -51,7 +55,7 @@ jobs:
           # no secrets are present in the container state or logs.
           install: |
             apt-get update -q -y
-            apt-get install -q -y git curl build-essential
+            apt-get install -q -y git curl build-essential pkg-config
             curl https://sh.rustup.rs -sSf | sh -s -- -y --target aarch64-unknown-linux-musl
 
           # Produce a binary artifact and place it in the mounted volume
