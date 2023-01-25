@@ -32,7 +32,7 @@ jobs:
           targets: ${{ env.TARGET_TRIPLE }}
 
       - name: Install linker
-        run: sudo apt-get install gcc-aarch64-linux-gnu
+        run: sudo apt-get install gcc-aarch64-linux-gnu aarch64-linux-musl-gcc aarch64-linux-musl-g++
 
       - name: Enable Cargo caching
         uses: Swatinem/rust-cache@v2
