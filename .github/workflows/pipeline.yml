@@ -14,9 +14,11 @@ jobs:
             distro: ubuntu20.04
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: uraimo/run-on-arch-action@v2
-        name: Build artifact
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build artifact  
+        uses: uraimo/run-on-arch-action@v2
         id: build
         with:
           arch: ${{ matrix.arch }}
@@ -58,6 +60,10 @@ jobs:
             cp $(which git) "/artifacts/${artifact_name}"
             echo "Produced artifact at /artifacts/${artifact_name}"
             rustc --version --verbose
+            ldd --version
+            echo ${PWD}
+# cargo b --release
+          
 
       - name: Show the artifact
         # Items placed in /artifacts in the container will be in
