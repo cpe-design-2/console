@@ -14,6 +14,7 @@ env:
   # compiler environment variables for cmake (freetype-sys crate)
   CC: aarch64-linux-gnu-gcc
   CXX: aarch64-linux-gnu-g++
+  PKG_CONFIG: aarch64-linux-gnu-pkg-config
 
   TARGET_TRIPLE: aarch64-unknown-linux-musl
 
@@ -35,7 +36,7 @@ jobs:
           targets: ${{ env.TARGET_TRIPLE }}
 
       - name: Install linker
-        run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+        run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu pkg-config-aarch64-linux-gnu
 
       - name: Enable Cargo caching
         uses: Swatinem/rust-cache@v2
