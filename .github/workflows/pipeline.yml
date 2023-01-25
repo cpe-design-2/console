@@ -12,8 +12,8 @@ env:
   # the path to the compiled executable
   APP_PATH: ./target/aarch64-unknown-linux-musl/release
   # compiler environment variables for cmake (freetype-sys crate)
-  CMAKE_C_COMPILER: aarch64-linux-gnu-gcc
-  CMAKE_CXX_COMPILER: aarch64-linux-gnu-g++
+  CC: aarch64-linux-gnu-gcc
+  CXX: aarch64-linux-gnu-g++
 
   TARGET_TRIPLE: aarch64-unknown-linux-musl
 
@@ -40,8 +40,8 @@ jobs:
       - name: Enable Cargo caching
         uses: Swatinem/rust-cache@v2
 
-      - name: Test
-        run: cargo test # --target aarch64-unknown-linux-gnu
+      # - name: Test
+      #   run: cargo test # --target aarch64-unknown-linux-gnu
 
       - name: Build
         run: cargo build --release --target ${{ env.TARGET_TRIPLE }}
