@@ -1,3 +1,11 @@
-# `godonsole`
+# `goco`
 
-Video game console source code for the godonsole open-source video game godot console.
+An open-source video game console for games built using the [Godot game engine](https://godotengine.org).
+
+## Building the console
+
+### Hardware
+
+### Software
+
+See the [installation script](./install.sh).

@@ -14,13 +14,18 @@
 #
 #   Download this script and execute it:
 #
-#   $ sh ./install.sh
+#   $   sh ./install.sh
+#   
+# References:
+#   - https://github.com/efornara/frt/blob/2.0.1/doc/Compile.md
+#   - https://linuxhint.com/use-etc-rc-local-boot/
 #
 
 # stop installation on any intermediate error
 set -e
 
 # 1) COMPILE GODOT GAME ENGINE
+# ----------------------------
 
 GODOT_VERSION="3.5.1-stable"
 
@@ -53,6 +58,8 @@ scons platform=frt tools=no target=release use_llvm=yes -j 4 module_webm_enabled
 
 
 # 3) DOWNLOAD THE GOCO COMPILED EXECUTABLE
+# ----------------------------------------
 
 
 # 4) EDIT "/etc/rc.local" TO ALLOW GOCO PROGRAM TO START-UP
+# ---------------------------------------------------------
