@@ -1,90 +1,62 @@
-name: Pipeline
-on:
-  push:
-
-env:
-  # the crate's name
-  TARGET: goco # godoco? goko? gc? goconsole?
-  # determine if to upload the executable as an artifact
-  IS_LIB: false
-  # the name of the compiled executable
-  APP: goco
-  # the path to the compiled executable
-  APP_PATH: ./target/aarch64-unknown-linux-musl/release
-  # compiler environment variables for cmake (freetype-sys crate)
-  # CC: aarch64-linux-gnu-gcc
-  # CXX: aarch64-linux-gnu-g++
-  # PKG_CONFIG: aarch64-linux-gnu-pkg-config
-  # PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig
-  # TARGET_TRIPLE: aarch64-unknown-linux-musl
-  # FONTCONFIG_DYNAMIC: 1
+on: [push, pull_request]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
+  build_job:
+    # The host should always be linux
+    runs-on: ubuntu-20.04
+    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
+
+    # Run steps on a matrix of 4 arch/distro combinations
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64
+            distro: ubuntu20.04
+
     steps:
-      - name: Fetch repository
-        uses: actions/checkout@v3
-
-      - name: Configure RPi-OS
-        uses: pguyot/arm-runner-action@v2
-        id: build_image
-        with: 
-          base_image: raspios_lite:2022-04-04
-          image_additional_mb: 1024
-          commands: |
-            curl https://sh.rustup.rs -sSf | sh -s -- -y
-            rustup toolchain install stable --profile minimal --no-self-update
-            echo "hello world"
-            echo $PWD
-
-      - name: Configure Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+      - uses: actions/checkout@v3
+      - uses: uraimo/run-on-arch-action@v2
+        name: Build artifact
+        id: build
         with:
-          toolchain: stable
-          # install the target for the RPi3
-          targets: ${{ env.TARGET_TRIPLE }}
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
 
-      # - name: Install linker
-      #   run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu pkg-config-aarch64-linux-gnu libfontconfig-dev fontconfig
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
 
-      # - name: Enable Cargo caching
-      #   uses: Swatinem/rust-cache@v2
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
 
-      # # - name: Find fontconfig
-      # #   run: |
-      # #     sudo apt-get install apt-file
-      # #     sudo apt-file update
-      # #     sudo apt-file search fontconfig.pc
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
 
-      # # - name: Test
-      # #   run: cargo test # --target aarch64-unknown-linux-gnu
+          # Pass some environment variables to the container
+          env: | # YAML, but pipe character is necessary
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
 
-      # - name: Build
-      #   run: cargo build --release --target ${{ env.TARGET_TRIPLE }}
+          # The shell to run commands with in the container
+          shell: /bin/sh
 
-      # - name: Package application
-      #   if: env.IS_LIB == 'false'
-      #   run: |
-      #     # copy files and produce compressed archive for distribution
-      #     import shutil, os
-      #     target = '${{ env.TARGET }}-${{ github.ref_name }}'
-      #     print(target)
-      #     # create intermediate artifact directory
-      #     os.makedirs(target)
-      #     # copy the executable into the final directory
-      #     shutil.copy2('${{ env.APP_PATH }}/${{ env.APP }}${{ matrix.ext }}', target+'/${{ env.APP }}${{ matrix.ext }}')
-      #     # compress the final directory
-      #     shutil.make_archive(target, 'zip', root_dir='.', base_dir=target)
-      #   shell: python
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+            apt-get update -q -y
+            apt-get install -q -y git
 
-      # - name: Upload artifact
-      #   if: env.IS_LIB == 'false'
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ env.TARGET }}-${{ github.ref_name }}
-      #     path: ./${{ env.TARGET }}-${{ github.ref_name }}.zip
-      #     if-no-files-found: error
+          # Produce a binary artifact and place it in the mounted volume
+          run: |
+            cp $(which git) "/artifacts/${artifact_name}"
+            echo "Produced artifact at /artifacts/${artifact_name}"
+
+      - name: Show the artifact
+        # Items placed in /artifacts in the container will be in
+        # ${PWD}/artifacts on the host.
+        run: |
+          ls -al "${PWD}/artifacts"
