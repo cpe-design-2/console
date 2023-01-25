@@ -49,9 +49,7 @@ jobs:
           install: |
             apt-get update -q -y
             apt-get install -q -y git curl
-            curl https://sh.rustup.rs -sSf | sh -s -- -y
-            source "$HOME/.cargo/env"
-            rustup toolchain install stable --target aarch64-unknown-linux-musl --profile minimal --no-self-update
+            curl https://sh.rustup.rs -sSf | sh -s -- -y --target aarch64-unknown-linux-musl
 
           # Produce a binary artifact and place it in the mounted volume
           run: |
