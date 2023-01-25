@@ -64,8 +64,6 @@ jobs:
             echo ${PWD}
             cargo b --release
             cp ./target/release/goco "/artifacts/goco"
-# cargo b --release
-          
 
       - name: Show the artifact
         # Items placed in /artifacts in the container will be in
