@@ -32,6 +32,7 @@ jobs:
           # Mount the artifacts directory as /artifacts in the container
           dockerRunArgs: |
             --volume "${PWD}/artifacts:/artifacts"
+            --platform linux/arm64/v8
 
           # Pass some environment variables to the container
           env: | # YAML, but pipe character is necessary
@@ -50,10 +51,10 @@ jobs:
             apt-get update -q -y
             apt-get install -q -y git curl
             curl https://sh.rustup.rs -sSf | sh -s -- -y --target aarch64-unknown-linux-musl
-            source "$HOME/.cargo/env"
 
           # Produce a binary artifact and place it in the mounted volume
           run: |
+            source "$HOME/.cargo/env"
             cp $(which git) "/artifacts/${artifact_name}"
             echo "Produced artifact at /artifacts/${artifact_name}"
             rustc --version --verbose
