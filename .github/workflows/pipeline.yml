@@ -44,9 +44,9 @@ jobs:
 
       - name: Find fontconfig
         run: |
-          apt-get install apt-file
-          apt-file update
-          apt-file search fontconfig.pc
+          sudo apt-get install apt-file
+          sudo apt-file update
+          sudo apt-file search fontconfig.pc
 
       # - name: Test
       #   run: cargo test # --target aarch64-unknown-linux-gnu
