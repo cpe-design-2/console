@@ -32,7 +32,7 @@ jobs:
           targets: ${{ env.TARGET_TRIPLE }}
 
       - name: Install linker
-        run: sudo apt-get install gcc-aarch64-linux-gnu aarch64-linux-musl-gcc aarch64-linux-musl-g++
+        run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Enable Cargo caching
         uses: Swatinem/rust-cache@v2
@@ -41,7 +41,10 @@ jobs:
         run: cargo test # --target aarch64-unknown-linux-gnu
 
       - name: Build
-        run: cargo build --release --target ${{ env.TARGET_TRIPLE }}
+        run: |
+        export CMAKE_C_COMPILER=aarch64-linux-gnu-gcc
+        export CMAKE_CXX_COMPILER=aarch64-linux-gnu-g++
+        cargo build --release --target ${{ env.TARGET_TRIPLE }}
 
       - name: Package application
         if: env.IS_LIB == 'false'
