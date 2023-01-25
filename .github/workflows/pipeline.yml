@@ -36,7 +36,10 @@ jobs:
           base_image: raspios_lite:2022-04-04
           image_additional_mb: 1024
           commands: |
+            curl https://sh.rustup.rs -sSf | sh -s -- -y
+            rustup toolchain install stable --profile minimal --no-self-update
             echo "hello world"
+            echo $PWD
 
       - name: Configure Rust toolchain
         uses: dtolnay/rust-toolchain@master
@@ -48,40 +51,40 @@ jobs:
       # - name: Install linker
       #   run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu pkg-config-aarch64-linux-gnu libfontconfig-dev fontconfig
 
-      - name: Enable Cargo caching
-        uses: Swatinem/rust-cache@v2
+      # - name: Enable Cargo caching
+      #   uses: Swatinem/rust-cache@v2
 
-      # - name: Find fontconfig
+      # # - name: Find fontconfig
+      # #   run: |
+      # #     sudo apt-get install apt-file
+      # #     sudo apt-file update
+      # #     sudo apt-file search fontconfig.pc
+
+      # # - name: Test
+      # #   run: cargo test # --target aarch64-unknown-linux-gnu
+
+      # - name: Build
+      #   run: cargo build --release --target ${{ env.TARGET_TRIPLE }}
+
+      # - name: Package application
+      #   if: env.IS_LIB == 'false'
       #   run: |
-      #     sudo apt-get install apt-file
-      #     sudo apt-file update
-      #     sudo apt-file search fontconfig.pc
+      #     # copy files and produce compressed archive for distribution
+      #     import shutil, os
+      #     target = '${{ env.TARGET }}-${{ github.ref_name }}'
+      #     print(target)
+      #     # create intermediate artifact directory
+      #     os.makedirs(target)
+      #     # copy the executable into the final directory
+      #     shutil.copy2('${{ env.APP_PATH }}/${{ env.APP }}${{ matrix.ext }}', target+'/${{ env.APP }}${{ matrix.ext }}')
+      #     # compress the final directory
+      #     shutil.make_archive(target, 'zip', root_dir='.', base_dir=target)
+      #   shell: python
 
-      # - name: Test
-      #   run: cargo test # --target aarch64-unknown-linux-gnu
-
-      - name: Build
-        run: cargo build --release --target ${{ env.TARGET_TRIPLE }}
-
-      - name: Package application
-        if: env.IS_LIB == 'false'
-        run: |
-          # copy files and produce compressed archive for distribution
-          import shutil, os
-          target = '${{ env.TARGET }}-${{ github.ref_name }}'
-          print(target)
-          # create intermediate artifact directory
-          os.makedirs(target)
-          # copy the executable into the final directory
-          shutil.copy2('${{ env.APP_PATH }}/${{ env.APP }}${{ matrix.ext }}', target+'/${{ env.APP }}${{ matrix.ext }}')
-          # compress the final directory
-          shutil.make_archive(target, 'zip', root_dir='.', base_dir=target)
-        shell: python
-
-      - name: Upload artifact
-        if: env.IS_LIB == 'false'
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.TARGET }}-${{ github.ref_name }}
-          path: ./${{ env.TARGET }}-${{ github.ref_name }}.zip
-          if-no-files-found: error
+      # - name: Upload artifact
+      #   if: env.IS_LIB == 'false'
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ env.TARGET }}-${{ github.ref_name }}
+      #     path: ./${{ env.TARGET }}-${{ github.ref_name }}.zip
+      #     if-no-files-found: error
