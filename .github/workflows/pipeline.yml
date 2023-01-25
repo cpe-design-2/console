@@ -42,9 +42,9 @@ jobs:
 
       - name: Build
         run: |
-        export CMAKE_C_COMPILER=aarch64-linux-gnu-gcc
-        export CMAKE_CXX_COMPILER=aarch64-linux-gnu-g++
-        cargo build --release --target ${{ env.TARGET_TRIPLE }}
+          export CMAKE_C_COMPILER=aarch64-linux-gnu-gcc
+          export CMAKE_CXX_COMPILER=aarch64-linux-gnu-g++
+          cargo build --release --target ${{ env.TARGET_TRIPLE }}
 
       - name: Package application
         if: env.IS_LIB == 'false'
