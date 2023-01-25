@@ -17,6 +17,7 @@ env:
   PKG_CONFIG: aarch64-linux-gnu-pkg-config
   PKG_CONFIG_PATH: /usr/lib/aarch64-linux-gnu/pkgconfig
   TARGET_TRIPLE: aarch64-unknown-linux-musl
+  FONTCONFIG_DYNAMIC: 1
 
 jobs:
   build:
