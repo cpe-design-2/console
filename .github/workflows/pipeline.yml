@@ -36,7 +36,7 @@ jobs:
           targets: ${{ env.TARGET_TRIPLE }}
 
       - name: Install linker
-        run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu pkg-config-aarch64-linux-gnu fontconfig
+        run: sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu pkg-config-aarch64-linux-gnu libfontconfig-dev fontconfig
 
       - name: Enable Cargo caching
         uses: Swatinem/rust-cache@v2
