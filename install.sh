@@ -31,8 +31,8 @@ GODOT_VERSION="3.5.1-stable"
 
 FRT_VERSION="2.0"
 
-# install dependencis for godot
-sudo apt-get install git build-essential scons pkg-config clang llvm lld libsdl2-dev libgles2-mesa-dev
+# install dependencis for godot and goco
+sudo apt-get install git build-essential scons pkg-config clang llvm lld libsdl2-dev libgles2-mesa-dev libfontconfig1
 
 # download the zipped source code
 curl -LO https://github.com/godotengine/godot/archive/refs/tags/$GODOT_VERSION.zip

@@ -39,7 +39,7 @@ impl Application for Events {
     type Flags = ();
 
     fn new(_flags: ()) -> (Events, Command<Message>) {
-        (Events::default(), Command::none())
+        (Events::default(), iced::window::set_mode::<Message>(window::Mode::Fullscreen))
     }
 
     fn title(&self) -> String {
@@ -121,3 +121,11 @@ impl Application for Events {
 // fn main() {
 //     println!("Booting up goco ...");
 // }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(true, true);
+    }
+}
