@@ -9,6 +9,8 @@ An open-source video game console for games built using the [Godot game engine](
 ### Hardware
 
 Flash a microSD card with a fresh image of the Raspberry Pi OS (64-bit) with desktop mode. The targeted device is the Raspberry Pi 3 Model B with 2GB Ram.  
+
+View the [block diagram](./docs/goco-bd.pdf) to understand how the device and its external components combine together to create an open-source console experience.
   
 The device's software will be properly initialized using the provided install script.
 
