@@ -2,6 +2,8 @@
 
 ![pipeline](https://github.com/cpe-design-2/console/actions/workflows/pipeline.yml/badge.svg)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 An open-source video game console for games built using the [Godot game engine](https://godotengine.org).
 
 ## Building the console
