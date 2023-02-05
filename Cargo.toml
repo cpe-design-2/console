@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 iced = "0.7"
+dirs = "4.0"
