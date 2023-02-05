@@ -1,19 +1,16 @@
-mod game;
+mod engine;
 mod env;
+mod game;
 mod gamestick;
 
 // Reference: https://github.com/iced-rs/iced/tree/0.7/examples/events
 use iced::alignment;
+use iced::event::Event;
 use iced::executor;
+use iced::subscription;
 use iced::widget::{button, checkbox, container, text, Column};
 use iced::window;
-use iced::{
-    Alignment, Application, Command, Element, Length, Settings, Subscription,
-    Theme,
-};
-use iced::event::Event;
-use iced::subscription;
-
+use iced::{Alignment, Application, Command, Element, Length, Settings, Subscription, Theme};
 
 pub fn go() -> u8 {
     println!("Booting up goco ...");
@@ -50,7 +47,7 @@ impl Application for Events {
 
     fn new(_flags: ()) -> (Events, Command<Message>) {
         (
-            Events::default(), 
+            Events::default(),
             // determine at run-time the full-screen mode
             match std::env::var(env::GOCO_NO_FULLSCREEN) {
                 Ok(_) => Command::none(),
@@ -103,11 +100,7 @@ impl Application for Events {
                 .collect(),
         );
 
-        let toggle = checkbox(
-            "Listen to runtime events",
-            self.enabled,
-            Message::Toggled,
-        );
+        let toggle = checkbox("Listen to runtime events", self.enabled, Message::Toggled);
 
         let exit = button(
             text("Exit")
@@ -133,11 +126,6 @@ impl Application for Events {
             .into()
     }
 }
-
-
-// fn main() {
-//     println!("Booting up goco ...");
-// }
 
 #[cfg(test)]
 mod tests {

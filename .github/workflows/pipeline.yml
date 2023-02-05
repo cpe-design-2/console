@@ -66,6 +66,7 @@ jobs:
             rustc --version --verbose
             ldd --version
             echo ${PWD}
+            cargo t --release
             cargo b --release
             cp ./target/release/goco "/artifacts/goco"
 
