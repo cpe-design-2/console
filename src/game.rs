@@ -21,11 +21,12 @@ impl Game {
     }
 
     /// Checks if the `path` is a valid Godot game file.
-    pub fn is_game_file<T: AsRef<Path> + ? Sized>(path: &T) -> bool {
-        std::path::Path::is_file(&path.as_ref()) && match path.as_ref().extension() {
-            Some(ext) => ext == GAME_EXT,
-            None => false,
-        }
+    pub fn is_game_file<T: AsRef<Path> + ?Sized>(path: &T) -> bool {
+        std::path::Path::is_file(&path.as_ref())
+            && match path.as_ref().extension() {
+                Some(ext) => ext == GAME_EXT,
+                None => false,
+            }
     }
 
     pub fn get_name(&self) -> &str {
@@ -33,7 +34,6 @@ impl Game {
         &self.pck.file_stem().as_ref().unwrap().to_str().unwrap()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

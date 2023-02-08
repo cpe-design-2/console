@@ -1,5 +1,5 @@
-use crate::game::Game;
 use crate::game;
+use crate::game::Game;
 use std::path::PathBuf;
 
 #[derive(Debug, PartialEq)]
@@ -18,24 +18,26 @@ impl GameStick {
     }
 
     /// Read the [GameStick]'s filesystem for Godot game files.
-    /// 
+    ///
     /// Assumes the [GameStick] is present and exists from the console's perspective.
     pub fn load(root: &PathBuf) -> Vec<Game> {
+        let glob_pattern = glob::Pattern::new(&format!(
+            "{}/**/*.{}",
+            root.to_str().unwrap(),
+            game::GAME_EXT
+        ))
+        .expect("Failed to read glob pattern");
 
-        let glob_pattern = glob::Pattern::new(&format!("{}/**/*.{}", root.to_str().unwrap(), game::GAME_EXT))
-            .expect("Failed to read glob pattern");
-        
-        glob::glob(&glob_pattern.as_str()).unwrap().filter_map(|entry| {
-            match entry {
-                Ok(path) => {
-                    Some(Game::new(path))
-                },
-                Err(e) => { 
-                    eprintln!("{:?}", e); 
-                    None 
-                },
-            }
-        }).collect()
+        glob::glob(&glob_pattern.as_str())
+            .unwrap()
+            .filter_map(|entry| match entry {
+                Ok(path) => Some(Game::new(path)),
+                Err(e) => {
+                    eprintln!("{:?}", e);
+                    None
+                }
+            })
+            .collect()
     }
 
     /// References the root path where to search for the [GameStick].
@@ -123,7 +125,16 @@ mod tests {
         let library = GameStick::load(GameStick::test_new().get_path());
 
         assert_eq!(library.len(), 2);
-        assert_eq!(library.iter().find(|f| f.get_name() == "fsm" ).is_some(), true);
-        assert_eq!(library.iter().find(|f| f.get_name() == "gd-paint" ).is_some(), true);
+        assert_eq!(
+            library.iter().find(|f| f.get_name() == "fsm").is_some(),
+            true
+        );
+        assert_eq!(
+            library
+                .iter()
+                .find(|f| f.get_name() == "gd-paint")
+                .is_some(),
+            true
+        );
     }
 }

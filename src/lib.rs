@@ -12,6 +12,10 @@ use iced::widget::{button, checkbox, container, text, Column};
 use iced::window;
 use iced::{Alignment, Application, Command, Element, Length, Settings, Subscription, Theme};
 
+use engine::Engine;
+use game::Game;
+use std::path::PathBuf;
+
 pub fn go() -> u8 {
     println!("Booting up goco ...");
     match Events::run(Settings {
@@ -36,6 +40,7 @@ struct Events {
 enum Message {
     EventOccurred(Event),
     Toggled(bool),
+    Play,
     Exit,
 }
 
@@ -84,6 +89,12 @@ impl Application for Events {
                 Command::none()
             }
             Message::Exit => window::close(),
+            Message::Play => {
+                println!("play game!");
+                let gd = Engine::new();
+                gd.play_game(&Game::new(PathBuf::from("./testenv/GAMESTICK/fsm2.pck")));
+                Command::none()
+            }
         }
     }
 
@@ -111,12 +122,22 @@ impl Application for Events {
         .padding(10)
         .on_press(Message::Exit);
 
+        let play = button(
+            text("Play")
+                .width(Length::Fill)
+                .horizontal_alignment(alignment::Horizontal::Center),
+        )
+        .width(Length::Units(100))
+        .padding(10)
+        .on_press(Message::Play);
+
         let content = Column::new()
             .align_items(Alignment::Center)
             .spacing(20)
             .push(events)
             .push(toggle)
-            .push(exit);
+            .push(exit)
+            .push(play);
 
         container(content)
             .width(Length::Fill)
