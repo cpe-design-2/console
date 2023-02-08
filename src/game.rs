@@ -51,5 +51,6 @@ mod tests {
         assert_eq!(Game::is_game_file("Cargo.toml"), false);
         // file does not exist
         assert_eq!(Game::is_game_file("testenv/GAMESTICK/missing.pck"), false);
+        assert_eq!(Game::is_game_file("./testenv/GAMESTICK/game"), false);
     }
 }
