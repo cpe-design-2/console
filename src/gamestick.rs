@@ -124,9 +124,13 @@ mod tests {
     fn ut_load_library() {
         let library = GameStick::load(GameStick::test_new().get_path());
 
-        assert_eq!(library.len(), 2);
+        assert_eq!(library.len(), 3);
         assert_eq!(
             library.iter().find(|f| f.get_name() == "fsm").is_some(),
+            true
+        );
+        assert_eq!(
+            library.iter().find(|f| f.get_name() == "fsm-2").is_some(),
             true
         );
         assert_eq!(
