@@ -92,7 +92,7 @@ impl Application for Events {
             Message::Play => {
                 println!("play game!");
                 let gd = Engine::new();
-                gd.play_game(&Game::new(PathBuf::from("./testenv/GAMESTICK/fsm2.pck")));
+                gd.play_game(&Game::new(PathBuf::from("/Users/chase/Develop/cen/goco/console/testenv/GAMESTICK/fsm-2.pck")));
                 Command::none()
             }
         }
