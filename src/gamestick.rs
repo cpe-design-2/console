@@ -62,6 +62,8 @@ impl GameStick {
             root
         } else if cfg!(target_os = "macos") == true {
             PathBuf::from("/Volumes/GAMESTICK")
+        } else if cfg!(target_os = "windows") == true {
+            PathBuf::from("D:/")
         } else {
             panic!("unsupported operating system")
         }
@@ -84,7 +86,9 @@ impl GameStick {
                 .spawn();
             #[cfg(target_os = "linux")]
             let command = std::process::Command::new("umount").arg(&self.path).spawn();
-
+            #[cfg(target_os = "windows")]
+            let command = std::process::Command::new("").spawn();
+            
             match command {
                 // successfully ejected
                 Ok(_) => true,
