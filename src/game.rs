@@ -41,7 +41,7 @@ mod tests {
 
     #[test]
     fn ut_is_game_file_good() {
-        assert_eq!(Game::is_game_file("testenv/GAMESTICK/gd-paint.pck"), true);
+        assert_eq!(Game::is_game_file("testenv/GAMESTICK/platformer.pck"), true);
         assert_eq!(Game::is_game_file("testenv/GAMESTICK/fsm.pck"), true);
     }
 

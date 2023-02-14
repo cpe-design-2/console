@@ -2,6 +2,7 @@ mod engine;
 mod env;
 mod game;
 mod gamestick;
+mod os;
 
 // Reference: https://github.com/iced-rs/iced/tree/0.7/examples/events
 use iced::alignment;
@@ -14,19 +15,30 @@ use iced::{Alignment, Application, Command, Element, Length, Settings, Subscript
 
 use engine::Engine;
 use game::Game;
+use os::Os;
 use std::path::PathBuf;
 
 pub fn go() -> u8 {
     println!("Booting up goco ...");
-    match Events::run(Settings {
-        exit_on_close_request: false,
-        ..Settings::default()
-    }) {
-        Ok(_) => 0,
-        Err(e) => {
-            eprintln!("{}", e);
-            101
-        }
+    // match Events::run(Settings {
+    //     exit_on_close_request: false,
+    //     ..Settings::default()
+    // }) {
+    //     Ok(_) => 0,
+    //     Err(e) => {
+    //         eprintln!("{}", e);
+    //         101
+    //     }
+    // }
+    match Os::run(Settings {
+            exit_on_close_request: false,
+            ..Settings::default()
+        }) {
+            Ok(_) => 0,
+            Err(e) => {
+                eprintln!("{}", e);
+                101
+            }
     }
 }
 
@@ -92,7 +104,7 @@ impl Application for Events {
             Message::Play => {
                 println!("play game!");
                 let gd = Engine::new();
-                gd.play_game(&Game::new(PathBuf::from("/Users/chase/Develop/cen/goco/console/testenv/GAMESTICK/fsm-2.pck")));
+                gd.play_game(&Game::new(PathBuf::from("./testenv/GAMESTICK/fsm.pck")));
                 Command::none()
             }
         }
