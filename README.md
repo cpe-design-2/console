@@ -52,3 +52,10 @@ At a minimum, the following tools and software are required to get the applicati
 
 - The Rust programming language
 - Cargo package manager
+
+## Limitations
+
+Currently, only the standard version of Godot is supported. The mono version is still under construction in getting a Godot Mono binary compiled for the targeted hardware.
+
+Roadblocks encountered:
+- extremely long compile times for the temporary Godot mono binary

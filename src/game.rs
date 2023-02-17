@@ -1,28 +1,23 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-type Pck = PathBuf;
-
-use iced::widget::container;
-use iced::widget::Container;
 use iced::Length;
-use iced::widget::image;
-use iced::widget::text;
+use iced::Alignment;
+use iced::widget::{Column, column, image, text, container};
 
 use crate::os::Message;
 
-use iced::alignment;
-use iced::event::Event;
-use iced::executor;
-use iced::keyboard::KeyCode;
-use iced::subscription;
-use iced::widget::{button, checkbox, Column};
-use iced::window;
-use iced::{Alignment, Application, Command, Element, Settings, Subscription, Theme};
-use iced::Sandbox;
-use iced::widget::{row, Row, column};
 
+type Pck = PathBuf;
+
+/// The default size for icons to be displayed in the game library.
+const ICON_SIZE: u16 = 256;
+
+/// The supported file extension for Godot games.
 pub const GAME_EXT: &str = "pck";
+
+/// The supported file extension for image loading.
+pub const ICON_EXT: &str = "png";
 
 #[derive(Debug, PartialEq)]
 pub struct Game {
@@ -50,15 +45,25 @@ impl Game {
             }
     }
 
+    /// Attempts to extract the game's icon file path.
+    /// 
+    /// If the result is some [PathBuf], then it is safe to assume the path
+    /// exists and is a file.
     pub fn get_icon_path(&self) -> Option<PathBuf> {
-        //&self.pck.file_stem()
         let mut icon_path = self.pck.clone();
-        icon_path.set_extension("png");
+        // replace the extension with the icon extension
+        icon_path.set_extension(ICON_EXT);
+        // verify the path exists and is a file
         if icon_path.exists() == true && icon_path.is_file() == true {
             Some(icon_path)
         } else {
             None
         }
+    }
+
+    /// Returns the console's included empty icon to display when no icon is present.
+    fn empty_icon() -> PathBuf {
+        PathBuf::from("assets/empty.png")
     }
 
     pub fn get_name(&self) -> &str {
@@ -75,12 +80,14 @@ impl<'a> Game {
         }
     }
 
+    /// Assembles the container to display an empty slot for a [Game] in the console's main library screen.
+    /// The function returns a blank icon and no text, but in the same format as a valid game would be.
     pub fn blank() -> Column<'a, Message> {
         Self::container(None)
             .push(
-                container(image("images/empty.png")
-                .width(Length::Units(256))
-                .height(Length::Units(256)))
+                container(image(Self::empty_icon())
+                .width(Length::Units(ICON_SIZE))
+                .height(Length::Units(ICON_SIZE)))
                 .center_x()         
             )
             .push(
@@ -91,13 +98,15 @@ impl<'a> Game {
             .align_items(Alignment::Center)
     }
 
+    /// Assembles the container to display the [Game] in the console's main library screen.
+    /// If `selected`, then the game's icon will be enlarged.
     pub fn draw(&self, selected: bool) -> Column<'a, Message> {
         Self::container(None)
             .push(
                 container(
-                    image(self.get_icon_path().unwrap())
-                    .width(Length::Units(256 + if selected == true { 128 } else { 0 }))
-                    .height(Length::Units(256 + if selected == true { 128 } else { 0 }))
+                    image(self.get_icon_path().unwrap_or(Self::empty_icon()))
+                    .width(Length::Units((ICON_SIZE as f32 * if selected == true { 1.5 } else { 1.0 }) as u16))
+                    .height(Length::Units((ICON_SIZE as f32 * if selected == true { 1.5 } else { 1.0 }) as u16))
                 ).center_x()
             )
             .push(
@@ -115,8 +124,8 @@ mod tests {
 
     #[test]
     fn ut_is_game_file_good() {
-        assert_eq!(Game::is_game_file("testenv/GAMESTICK/platformer.pck"), true);
-        assert_eq!(Game::is_game_file("testenv/GAMESTICK/fsm.pck"), true);
+        assert_eq!(Game::is_game_file("testenv/GAMESTICK/Super Platformer.pck"), true);
+        assert_eq!(Game::is_game_file("testenv/GAMESTICK/Finite State Machine.pck"), true);
     }
 
     #[test]
@@ -126,5 +135,17 @@ mod tests {
         // file does not exist
         assert_eq!(Game::is_game_file("testenv/GAMESTICK/missing.pck"), false);
         assert_eq!(Game::is_game_file("./testenv/GAMESTICK/game"), false);
+    }
+
+    #[test]
+    fn ut_get_icon_path_some() {
+        let vg = Game::new("testenv/GAMESTICK/Finite State Machine.pck".into());
+        assert_eq!(vg.get_icon_path(), Some("testenv/GAMESTICK/Finite State Machine.png".into()));
+    }
+
+    #[test]
+    fn ut_get_icon_path_none() {
+        let vg = Game::new("testenv/GAMESTICK/game.pck".into());
+        assert_eq!(vg.get_icon_path(), None);
     }
 }

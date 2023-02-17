@@ -4,32 +4,15 @@ mod game;
 mod gamestick;
 mod os;
 
-// Reference: https://github.com/iced-rs/iced/tree/0.7/examples/events
-use iced::alignment;
-use iced::event::Event;
-use iced::executor;
-use iced::subscription;
-use iced::widget::{button, checkbox, container, text, Column};
-use iced::window;
-use iced::{Alignment, Application, Command, Element, Length, Settings, Subscription, Theme};
-
 use engine::Engine;
 use game::Game;
 use os::Os;
 use std::path::PathBuf;
 
+use iced::Settings;
+
 pub fn go() -> u8 {
     println!("Booting up goco ...");
-    // match Events::run(Settings {
-    //     exit_on_close_request: false,
-    //     ..Settings::default()
-    // }) {
-    //     Ok(_) => 0,
-    //     Err(e) => {
-    //         eprintln!("{}", e);
-    //         101
-    //     }
-    // }
     match Os::run(Settings {
             exit_on_close_request: false,
             ..Settings::default()
@@ -41,6 +24,22 @@ pub fn go() -> u8 {
             }
     }
 }
+
+// @NOTE: THE FOLLOWING CODE WAS USED FOR DEMONSTRATION PURPOSES AND IS NOT CURRENTLY USED
+// EXCEPT FOR REFERENCE AND LEARNING.
+//
+// @TODO: DELETE AT A LATER TIME
+//
+//  Reference: https://github.com/iced-rs/iced/tree/0.7/examples/events
+// ***************************************************************************************
+
+use iced::alignment;
+use iced::event::Event;
+use iced::executor;
+use iced::subscription;
+use iced::widget::{button, checkbox, container, text, Column};
+use iced::window;
+use iced::{Alignment, Application, Command, Element, Length, Subscription, Theme};
 
 #[derive(Debug, Default)]
 struct Events {
@@ -157,13 +156,5 @@ impl Application for Events {
             .center_x()
             .center_y()
             .into()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(true, true);
     }
 }
