@@ -17,3 +17,38 @@ The device's software will be properly initialized using the provided install sc
 ### Software
 
 The goco consists of the Godot game engine built for the FRT platform and the goco binary executable. The executable is compiled in GitHub Actions for continuous deployment for the necessary target `aarch64-unknown-linux-gnu`. See the [installation script](./install.sh).
+
+
+## Emulating the console
+
+The console "operating system" application is written in the Rust programming language. It can be tested independent of its targetd Raspberry Pi platform through cross-compilation.
+
+To run the unit tests:
+```
+cargo test
+```
+
+To build the application:
+```
+cargo build
+```
+
+To run the application:
+```
+cargo run
+```
+
+## Environment Variables
+
+The following environment variables affect the console:
+
+- `GOCO_NO_FULLSCREEN`: Disable fullscreen mode during start-up when this environment variable exists
+
+- `GOCO_GODOT_PATH`: The complete path to the Godot engine binary to be invoked when booting a video game from a .pck file.
+
+## Dependencies
+
+At a minimum, the following tools and software are required to get the application built and running:
+
+- The Rust programming language
+- Cargo package manager

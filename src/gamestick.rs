@@ -130,13 +130,13 @@ mod tests {
 
         assert_eq!(library.len(), 2);
         assert_eq!(
-            library.iter().find(|f| f.get_name() == "fsm").is_some(),
+            library.iter().find(|f| f.get_name() == "FSM").is_some(),
             true
         );
         assert_eq!(
             library
                 .iter()
-                .find(|f| f.get_name() == "platformer")
+                .find(|f| f.get_name() == "Platformer")
                 .is_some(),
             true
         );

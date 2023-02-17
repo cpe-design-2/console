@@ -25,6 +25,7 @@ pub enum Message {
 use std::path::PathBuf;
 
 use iced::alignment;
+use iced::widget::Container;
 use iced::event::Event;
 use iced::executor;
 use iced::keyboard::KeyCode;
@@ -32,8 +33,27 @@ use iced::subscription;
 use iced::widget::{button, checkbox, container, text, Column};
 use iced::window;
 use iced::{Alignment, Application, Command, Element, Length, Settings, Subscription, Theme};
-use iced::Sandbox;
 use iced::widget::{row, Row, column};
+
+
+impl Os {
+    /// Access the games surrounding the current index.
+    fn get_nearby_games(&self) -> [Option<&Game>; 3] {
+        let mut result = [None, None, None];
+        // check at one level before and one level after the current index
+        result[0] = if self.count == 0 {
+            None
+        } else {
+            self.library.get(self.count - 1)
+        };
+
+        result[1] = self.library.get(self.count);
+
+        result[2] = self.library.get(self.count + 1);
+
+        result
+    }
+}
 
 impl Application for Os {
     type Message = Message;
@@ -45,7 +65,7 @@ impl Application for Os {
         (
             Self {
                 engine: Engine::new(),
-                library: GameStick::load(&PathBuf::from("./testenv/GAMESTICK")),
+                library: GameStick::load(&PathBuf::from(format!("{}/testenv/GAMESTICK", env!("CARGO_MANIFEST_DIR")))),
                 count: 0,
             },
             // determine at run-time the full-screen mode
@@ -132,18 +152,22 @@ impl Application for Os {
     }
 
     fn view(&self) -> Element<Message> {
-        // We use a column: a simple vertical layout
-        column![        
+        let nearby_games = self.get_nearby_games();
+        // use a column: a simple vertical layout
+        column![  
+            // display the game's in a row      
             row![
-                // show the game's name
-                text(self.library.get(0).unwrap().get_name()).size(if self.count == 0 { 50 } else { 25 }),
-                text(self.library.get(1).unwrap().get_name()).size(if self.count == 1 { 50 } else { 25 }),
+                match nearby_games[0] { Some(g) => { Container::new(g.draw(false)) } None => { Container::new(Game::blank()) } },
+                // the middle index (`1`) is the selected game
+                match nearby_games[1] { Some(g) => { Container::new(g.draw(true)) } None => { Container::new(Game::blank()) } },
+                match nearby_games[2] { Some(g) => { Container::new(g.draw(false)) } None => { Container::new(Game::blank()) } },
             ]
-            .padding(50)
-            .spacing(50)
-            .align_items(Alignment::Center),
+            .spacing(64),
             button("play").on_press(Message::PlayGame),
         ]
+        .width(Length::Fill)
+        .height(Length::Fill)
+        .spacing(64)
         .align_items(Alignment::Center)
         .into()
     }
