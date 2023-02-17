@@ -18,13 +18,10 @@ pub struct Os {
 pub enum Message {
     EventOccurred(Event),
     PlayGame,
-    SelectNextGame,
-    SelectPrevGame,
 }
 
 use std::path::PathBuf;
 
-use iced::alignment;
 use iced::widget::Container;
 use iced::event::Event;
 use iced::executor;
@@ -38,6 +35,9 @@ use iced::widget::{row, Row, column};
 
 impl Os {
     /// Access the games surrounding the current index.
+    /// 
+    /// Returns an element with entry `None` if the index is out of bounds of the
+    /// currently loaded game library.
     fn get_nearby_games(&self) -> [Option<&Game>; 3] {
         let mut result = [None, None, None];
         // check at one level before and one level after the current index
@@ -82,20 +82,6 @@ impl Application for Os {
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::SelectNextGame => {
-                // cap at len()-1
-                if self.count + 1 < self.library.len() {
-                    self.count += 1;
-                }
-                Command::none()
-            }
-            Message::SelectPrevGame => {
-                // cap at 0
-                if self.count >= 1 {
-                    self.count -= 1;
-                }
-                Command::none()
-            }
             Message::PlayGame => {
                 // guaranteed to have `count` as a valid index for game library
                 self.engine.play_game(self.library.get(self.count).unwrap());
@@ -163,7 +149,7 @@ impl Application for Os {
                 match nearby_games[2] { Some(g) => { Container::new(g.draw(false)) } None => { Container::new(Game::blank()) } },
             ]
             .spacing(64),
-            button("play").on_press(Message::PlayGame),
+            button("PLAY").on_press(Message::PlayGame),
         ]
         .width(Length::Fill)
         .height(Length::Fill)
