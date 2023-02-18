@@ -172,7 +172,9 @@ impl Application for Os {
                         // attempt to load the gamestick's library
                         if self.drive.exists() == true { 
                             println!("info: GAMESTICK detected ...");
-                            self.initialize_library(); 
+                            self.initialize_library();
+                        } else {
+                            println!("info: Scanning for GAMESTICK at directory: {:?}", self.drive.get_path());
                         }
                     }
                     State::Loading => {
@@ -183,6 +185,7 @@ impl Application for Os {
                         }
                     }
                 }
+
                 Command::none()
             }
             // handle event to enter a game
