@@ -17,6 +17,11 @@ impl GameStick {
         }
     }
 
+    /// Check if the operating system has permissions to read the root directory.
+    pub fn can_read_dir(&self) -> bool {
+        std::path::Path::read_dir(&self.path).is_ok()
+    }
+
     /// Read the [GameStick]'s filesystem for Godot game files.
     ///
     /// Assumes the [GameStick] is present and exists from the console's perspective.
@@ -28,12 +33,16 @@ impl GameStick {
         ))
         .expect("Failed to read glob pattern");
 
+        // collect all games on the drive
         glob::glob(&glob_pattern.as_str())
             .unwrap()
             .filter_map(|entry| match entry {
-                Ok(path) => Some(Game::new(path)),
+                Ok(path) => match Game::is_game_file(&path) {
+                    true => Some(Game::new(path)),
+                    false => None,
+                }
                 Err(e) => {
-                    eprintln!("{:?}", e);
+                    eprintln!("error: {:?}", e);
                     None
                 }
             })

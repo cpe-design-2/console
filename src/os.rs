@@ -1,13 +1,14 @@
-use std::path::PathBuf;
-
 use iced::event::Event;
 use iced::executor;
 use iced::keyboard::KeyCode;
 use iced::subscription;
 use iced::window;
+use std::time::{Duration, Instant};
+use iced::time;
 use iced::keyboard::Event::KeyPressed;
 use iced::{Alignment, Application, Command, Element, Length, Subscription, Theme};
 use iced::widget::{row, column, button, Container};
+use iced::widget::text;
 
 use crate::engine::Engine;
 use crate::game::Game;
@@ -16,22 +17,43 @@ use crate::gamestick::GameStick;
 // model the state of the application
 #[derive(Debug, PartialEq)]
 pub struct Os {
-    // the backend Godot game engine to invoke for playing games
+    /// The backend Godot game engine to invoke for playing games.
     engine: Engine,
-    /// List of all available loaded games
+    /// The available media drive.
+    drive: GameStick,
+    /// List of all available loaded games.
     library: Vec<Game>,
-    /// Determine the current selected game in the list
+    /// Determine the current selected game in the list.
     count: usize,
+    /// Track the application's state.
+    state: State,
+}
+
+#[derive(Debug, PartialEq)]
+enum State {
+    /// Request the user to insert a game drive.
+    Requesting,
+    /// Read games from the game drive.
+    Loading
 }
 
 impl Os {
     /// Constructs a new [Os] structure.
+    /// 
+    /// Also immediately checks if a [GameStick] is entered to load games without initial delay.
     pub fn new() -> Self {
-        Self {
+        let mut os = Self {
             engine: Engine::new(),
-            library: GameStick::load(&PathBuf::from(format!("{}/testenv/GAMESTICK", env!("CARGO_MANIFEST_DIR")))),
+            drive: GameStick::new(),
+            library: Vec::new(),
             count: 0,
+            state: State::Requesting,
+        };
+        // check if game stick is already inserted on application start
+        if os.drive.exists() == true {
+            os.initialize_library();
         }
+        os
     }
 
     /// Access the games surrounding the current index.
@@ -71,12 +93,52 @@ impl Os {
         }
         able_to_shift
     }
+
+    /// Transitions from the `Requesting` state to the `Loading` State while
+    /// if the drive can successfully be read from the filesystem.
+    /// 
+    /// Returns `true` if the state transition occurs successfully and `false` otherwise.
+    fn initialize_library(&mut self) -> bool {
+        self.count = 0;
+        if self.drive.can_read_dir() == false { return false };
+        self.library = GameStick::load(self.drive.get_path());
+        self.state = State::Loading;
+        true
+    }
+
+    /// Transitions from the `Loading` state to the `Requesting` State while
+    /// unloading the game library.
+    /// 
+    /// Returns `true` if the state transition occurs successfully and `false` otherwise.
+    fn flush_library(&mut self) -> bool {
+        self.library = Vec::new();
+        self.count = 0;
+        self.state = State::Requesting;
+        true
+    }
+
+    /// Safely ejects the USB GAMESTICK drive and cleans up the currently
+    /// loaded library.
+    fn remove_drive(&mut self) -> bool {
+        if self.drive.eject() == true {
+            self.flush_library()
+        } else {
+            false
+        }
+    }
+
+    /// Invokes the engine to run the game at index `count` in the loaded game library.
+    fn select_game(&self) {
+        // guaranteed to have `count` as a valid index for game library
+        self.engine.play_game(self.library.get(self.count).unwrap());
+    }
 }
 
 // define the possible user interactions of the main screen operating system
 #[derive(Debug, Clone)]
 pub enum Message {
     EventOccurred(Event),
+    ScanDrive(Instant),
     PlayGame,
 }
 
@@ -103,87 +165,130 @@ impl Application for Os {
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::PlayGame => {
-                // guaranteed to have `count` as a valid index for game library
-                self.engine.play_game(self.library.get(self.count).unwrap());
+            // handle background checking the filesystem for the gamestick directory
+            Message::ScanDrive(_instant) => {
+                match self.state {
+                    State::Requesting => {
+                        // attempt to load the gamestick's library
+                        if self.drive.exists() == true { 
+                            println!("info: GAMESTICK detected ...");
+                            self.initialize_library(); 
+                        }
+                    }
+                    State::Loading => {
+                        // attempt to remove the gamestick's library (USB media is gone)
+                        if self.drive.exists() == false {
+                            println!("info: Removing GAMESTICK ...");
+                            self.flush_library();
+                        }
+                    }
+                }
                 Command::none()
             }
-            Message::EventOccurred(Event::Window(event)) => {
-                if window::Event::CloseRequested == event {
-                    window::close()
-                } else {
-                    Command::none()
-                }
+            // handle event to enter a game
+            Message::PlayGame => {
+                self.select_game();
+                Command::none()
             }
-            // handle keyboard input
+            // handle keyboard input (only subscribed during `Loading` state)
             Message::EventOccurred(Event::Keyboard(event)) => {
                 if let KeyPressed { key_code, modifiers: _ } = event {
                     match key_code {
                         // right
-                        KeyCode::D => {
-                            self.shift_shelf_right();
-                        },
+                        KeyCode::D => { self.shift_shelf_right(); },
                         // left
-                        KeyCode::A => {
-                            self.shift_shelf_left();
-                        },
+                        KeyCode::A => { self.shift_shelf_left(); },
                         // down
-                        KeyCode::S => {
-
-                        },
+                        KeyCode::S => { },
                         // up
-                        KeyCode::W => {
-
-                        },
+                        KeyCode::W => { },
                         // action key (spacebar)
-                        KeyCode::Space => {
-                            // guaranteed to have `count` as a valid index for game library
-                            self.engine.play_game(self.library.get(self.count).unwrap());
-                        }
+                        KeyCode::Space => { self.select_game(); }
+                        // @todo: replace with external signal from RPI to eject the drive
+                        KeyCode::Q => { self.remove_drive(); }
                         _ => (),
                     }
                 }
                 Command::none()
+            }
+            // handle window closing
+            Message::EventOccurred(Event::Window(window::Event::CloseRequested)) => {
+                window::close()
             }
             _ => Command::none()
         }
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        subscription::events().map(Message::EventOccurred)
+        match self.state {
+            State::Requesting => {
+                time::every(Duration::from_millis(1000)).map(Message::ScanDrive)
+            },
+            State::Loading => {
+                Subscription::batch(
+                    vec![
+                        subscription::events().map(Message::EventOccurred),
+                        time::every(Duration::from_millis(1000)).map(Message::ScanDrive)
+                    ]
+                )
+
+            }
+        }
     }
 
     fn view(&self) -> Element<Message> {
-        let nearby_games = self.get_nearby_games();
-        // use a column: a simple vertical layout
-        column![  
-            // display the game's in a row      
-            row![
-                // game appear on the LHS
-                match nearby_games[0] { Some(g) => { Container::new(g.draw(false)) } None => { Container::new(Game::blank()) } },
-                // the middle index (`1`) is the selected game
-                match nearby_games[1] { Some(g) => { Container::new(g.draw(true)) } None => { Container::new(Game::blank()) } },
-                // game appear on the RHS
-                match nearby_games[2] { Some(g) => { Container::new(g.draw(false)) } None => { Container::new(Game::blank()) } },
-            ]
-            .spacing(64),
-            button("PLAY").on_press(Message::PlayGame),
-        ]
-        .width(Length::Fill)
-        .height(Length::Fill)
-        .spacing(64)
-        .align_items(Alignment::Center)
-        .into()
+        match self.state {
+            State::Requesting => {
+                column![
+                    text("Insert GAMESTICK ...")
+                    .vertical_alignment(iced::alignment::Vertical::Center)
+                    .horizontal_alignment(iced::alignment::Horizontal::Center)
+                ]
+                .padding(128)
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .spacing(64)
+                .align_items(Alignment::Center)
+                .into()
+            },
+            State::Loading => {
+                let nearby_games = self.get_nearby_games();
+                // use a column: a simple vertical layout
+                column![  
+                    // display the game's in a row      
+                    row![
+                        // game appear on the LHS
+                        match nearby_games[0] { Some(g) => { Container::new(g.draw(false)) } None => { Container::new(Game::blank()) } },
+                        // the middle index (`1`) is the selected game
+                        match nearby_games[1] { Some(g) => { Container::new(g.draw(true)) } None => { Container::new(Game::blank()) } },
+                        // game appear on the RHS
+                        match nearby_games[2] { Some(g) => { Container::new(g.draw(false)) } None => { Container::new(Game::blank()) } },
+                    ]
+                    .spacing(64),
+                    button("PLAY").on_press(Message::PlayGame),
+                ]
+                .padding(32)
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .spacing(64)
+                .align_items(Alignment::Center)
+                .into()
+            },
+        }
+
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::path::PathBuf;
 
     #[test]
     fn it_load_nearby_games() {
         let mut os = Os {
+            drive: GameStick::new(),
+            state: State::Requesting,
             engine: Engine::new(),
             library: GameStick::load(&PathBuf::from(format!("{}/testenv/GAMESTICK", env!("CARGO_MANIFEST_DIR")))),
             count: 0,
