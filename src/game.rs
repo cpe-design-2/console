@@ -1,3 +1,4 @@
+use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -5,6 +6,7 @@ use iced::Length;
 use iced::Alignment;
 use iced::widget::{Column, column, image, text, container};
 
+use crate::env::GOCO_ROOT;
 use crate::os::Message;
 
 
@@ -62,8 +64,11 @@ impl Game {
     }
 
     /// Returns the console's included empty icon to display when no icon is present.
+    /// 
+    /// Reads from the `GOCO_ROOT` environment variable to determine the base directory
+    /// for finding the `assets/empty.png` file.
     fn empty_icon() -> PathBuf {
-        PathBuf::from("assets/empty.png")
+        PathBuf::from(format!("{}/assets/empty.png", env::var_os(GOCO_ROOT).unwrap_or(".".into()).to_string_lossy()))
     }
 
     pub fn get_name(&self) -> &str {
