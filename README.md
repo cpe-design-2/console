@@ -46,6 +46,8 @@ The following environment variables affect the console:
 
 - `GOCO_GODOT_PATH`: The complete path to the Godot engine binary to be invoked when booting a video game from a .pck file.
 
+-  `GOCO_ROOT`: The directory from where to fetch Goco-related files. If this environment variable does not exist then it defaults to using the current working directory '.'.
+
 ## Dependencies
 
 At a minimum, the following tools and software are required to get the application built and running:
@@ -55,7 +57,9 @@ At a minimum, the following tools and software are required to get the applicati
 
 ## Limitations
 
-Currently, only the standard version of Godot is supported. The mono version is still under construction in getting a Godot Mono binary compiled for the targeted hardware.
+1. The OpenGL backend is not supported for rendering images on Linux machines for the `iced` crate. This currently prevents properly displaying PNG images for targets that choose to render with the OpenGL backend.
+
+2. Currently, only the standard version of Godot is supported. The mono version is still under construction in getting a Godot Mono binary compiled for the targeted hardware.
 
 Roadblocks encountered:
 - extremely long compile times for the temporary Godot mono binary
