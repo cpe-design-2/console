@@ -60,14 +60,12 @@ impl GameStick {
     /// Supports `linux` os and `macos` os paths.
     fn determine_gamestick_path() -> PathBuf {
         if cfg!(target_os = "linux") == true {
-            let mut root = PathBuf::from("/media/");
+            let mut root = PathBuf::from("/media");
             match dirs::home_dir() {
-                Some(hp) => {
-                    root.push(hp.file_name().unwrap());
-                    root.push("/GAMESTICK")
-                }
-                None => root.push("GAMESTICK"),
+                Some(hp) => root.push(hp.file_name().unwrap()),
+                None => ()
             }
+            root.push("GAMESTICK");
             root
         } else if cfg!(target_os = "macos") == true {
             PathBuf::from("/Volumes/GAMESTICK")
@@ -126,6 +124,14 @@ impl GameStick {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ut_combining_paths() {
+        let mut root = PathBuf::from("/media");
+        root.push(PathBuf::from("home/rpi3/").file_name().unwrap());
+        root.push("GAMESTICK");
+        assert_eq!(root, PathBuf::from("/media/rpi3/GAMESTICK"));
+    }
 
     #[test]
     fn ut_exists() {
