@@ -129,7 +129,7 @@ impl Os {
 
     /// Invokes the engine to run the game at index `count` in the loaded game library.
     fn select_game(&self) {
-        // guaranteed to have `count` as a valid index for game library
+        // guaranteed to have `count` as a valid index for game library vector
         self.engine.play_game(self.library.get(self.count).unwrap());
     }
 }
@@ -195,22 +195,27 @@ impl Application for Os {
             }
             // handle keyboard input (only subscribed during `Loading` state)
             Message::EventOccurred(Event::Keyboard(event)) => {
-                if let KeyPressed { key_code, modifiers: _ } = event {
-                    match key_code {
-                        // right
-                        KeyCode::D => { self.shift_shelf_right(); },
-                        // left
-                        KeyCode::A => { self.shift_shelf_left(); },
-                        // down
-                        KeyCode::S => { },
-                        // up
-                        KeyCode::W => { },
-                        // action key (spacebar)
-                        KeyCode::Space => { self.select_game(); }
-                        // @todo: replace with external signal from RPI to eject the drive
-                        KeyCode::Q => { self.remove_drive(); }
-                        _ => (),
+                match self.state {
+                    State::Loading => {
+                        if let KeyPressed { key_code, modifiers: _ } = event {
+                            match key_code {
+                                // right
+                                KeyCode::D => { self.shift_shelf_right(); },
+                                // left
+                                KeyCode::A => { self.shift_shelf_left(); },
+                                // down
+                                KeyCode::S => { },
+                                // up
+                                KeyCode::W => { },
+                                // action key (spacebar)
+                                KeyCode::Space => { self.select_game(); }
+                                // @todo: replace with external signal from RPI to eject the drive
+                                KeyCode::Q => { self.remove_drive(); }
+                                _ => (),
+                            }
+                        }
                     }
+                    _ => (),
                 }
                 Command::none()
             }
@@ -223,20 +228,10 @@ impl Application for Os {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        match self.state {
-            State::Requesting => {
-                time::every(Duration::from_millis(1000)).map(Message::ScanDrive)
-            },
-            State::Loading => {
-                Subscription::batch(
-                    vec![
-                        subscription::events().map(Message::EventOccurred),
-                        time::every(Duration::from_millis(1000)).map(Message::ScanDrive)
-                    ]
-                )
-
-            }
-        }
+        Subscription::batch(vec![
+            subscription::events().map(Message::EventOccurred),
+            time::every(Duration::from_millis(1000)).map(Message::ScanDrive)
+        ])
     }
 
     fn view(&self) -> Element<Message> {
