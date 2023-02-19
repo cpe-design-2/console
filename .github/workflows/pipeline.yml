@@ -1,7 +1,7 @@
 on: [push, pull_request]
 
 jobs:
-  build_job:
+  build:
     # The host should always be linux
     runs-on: ubuntu-20.04
     name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
@@ -82,3 +82,47 @@ jobs:
           name: goco
           path: ./artifacts/goco
           if-no-files-found: error
+  
+  pack:
+    needs: [build]
+    runs-on: ubuntu-latest
+    name: Package artifact
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: goco
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - name: Set environment variables
+        run: echo "GOCO_PKG_NAME=goco-$(git describe --abbrev=0 --tags --always)-aarch-linux" >> $GITHUB_ENV
+
+      - name: Create package structure
+        run: |
+          mkdir ${{ env.GOCO_PKG_NAME }}
+          mkdir ${{ env.GOCO_PKG_NAME }}/bin
+          mkdir ${{ env.GOCO_PKG_NAME }}/assets
+
+      - name: Copy contents into package
+        run: |
+          cp ./goco ${{ env.GOCO_PKG_NAME }}/bin/goco
+          cp -R ./assets/ {{ env.GOCO_PKG_NAME }}/assets
+          cp ./install.sh {{ env.GOCO_PKG_NAME }}/install.sh
+          cp ./LICENSE {{ env.GOCO_PKG_NAME }}/LICENSE
+
+      - name: Archive the package
+        run: tar -czf ${{ env.GOCO_PKG_NAME }}.zip ${{env.GOCO_PKG_NAME }}
+
+      - name: Upload the archived package
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.GOCO_PKG_NAME }}
+          path: ${{ env.GOCO_PKG_NAME }}.zip
+          if-no-files-found: error
+
+          
