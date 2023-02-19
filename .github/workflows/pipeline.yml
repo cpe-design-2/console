@@ -113,9 +113,9 @@ jobs:
       - name: Copy contents into package
         run: |
           cp "./goco" ${{ env.GOCO_PKG_NAME }}/bin/goco
-          cp -R "./assets/" {{ env.GOCO_PKG_NAME }}/assets
-          cp "./install.sh" {{ env.GOCO_PKG_NAME }}/install.sh
-          cp "./LICENSE" {{ env.GOCO_PKG_NAME }}/LICENSE
+          cp -R "./assets/" ${{ env.GOCO_PKG_NAME }}/assets
+          cp "./install.sh" ${{ env.GOCO_PKG_NAME }}/install.sh
+          cp "./LICENSE" ${{ env.GOCO_PKG_NAME }}/LICENSE
 
       - name: Archive the package
         run: tar -czf ${{ env.GOCO_PKG_NAME }}.zip ${{env.GOCO_PKG_NAME }}
