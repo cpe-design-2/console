@@ -58,6 +58,9 @@ At a minimum, the following tools and software are required to get the applicati
 ## Limitations
 
 1. The OpenGL backend is not supported for rendering images on Linux machines for the `iced` crate. This currently prevents properly displaying PNG images for targets that choose to render with the OpenGL backend.
+ 
+Roadblocks encountered:
+- failed to compile Vulkan (alternate WGPU_BACKEND) for RaspberryPi OS. See these projects and forums: ([rpi-vk-driver/issues](https://github.com/Yours3lf/rpi-vk-driver/issues/6), [vulkan-loader](https://github.com/KhronosGroup/Vulkan-Loader), [vulkan-header](https://github.com/KhronosGroup/Vulkan-Headers/blob/main/BUILD.md).
 
 2. Currently, only the standard version of Godot is supported. The mono version is still under construction in getting a Godot Mono binary compiled for the targeted hardware.
 
