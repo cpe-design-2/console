@@ -4,6 +4,9 @@ mod game;
 mod gamestick;
 mod os;
 
+#[cfg(feature = "rpi")]
+mod gpio;
+
 use engine::Engine;
 use game::Game;
 use os::Os;
@@ -11,8 +14,18 @@ use std::path::PathBuf;
 
 use iced::Settings;
 
+#[cfg(feature = "rpi")]
+fn init_rpi() {
+    println!("Initializing GPIO ...");
+    if let Error(e) = gpio::configure() {
+        eprintln!("{}", e)
+    }
+}
+
 pub fn go() -> u8 {
-    println!("Booting up goco ...");
+    #[cfg(feature = "rpi")]
+    init_rpi();
+    println!("Booting up GOCO ...");
     match Os::run(Settings {
             exit_on_close_request: false,
             ..Settings::default()
