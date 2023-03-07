@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use iced::Length;
 use iced::Alignment;
-use iced::widget::{Column, column, image, text, container};
+use iced::widget::{Column, image, text, container};
 
 use crate::env::GOCO_ROOT;
 use crate::os::Message;
@@ -80,8 +80,8 @@ impl Game {
 impl<'a> Game {
     pub fn container(title: Option<&str>) -> Column<'a, Message> {
         match title {
-            Some(s) => column![text(s).size(50)].spacing(20),
-            None => column![].spacing(20)
+            Some(s) => iced::widget::column![text(s).size(50)].spacing(20),
+            None => iced::widget::column![].spacing(20)
         }
     }
 

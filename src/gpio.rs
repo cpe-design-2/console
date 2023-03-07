@@ -20,3 +20,15 @@ pub fn configure() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
+
+// Outputs
+// -------
+// - LED for indicating when the gamestick is IN/VISIBLE
+// - LED to indicate power-on state vs. sleep state
+
+// Inputs
+// ------
+// - button to exit a game (kill godot process)
+// - button to toggle between sleep and power-on states
+// - knob with resistor ladder for ADC for volume control

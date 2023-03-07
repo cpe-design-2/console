@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 use iced::time;
 use iced::keyboard::Event::KeyPressed;
 use iced::{Alignment, Application, Command, Element, Length, Subscription, Theme};
-use iced::widget::{row, column, button, Container};
+use iced::widget::{button, Container};
 use iced::widget::text;
 
 use crate::engine::Engine;
@@ -237,7 +237,7 @@ impl Application for Os {
     fn view(&self) -> Element<Message> {
         match self.state {
             State::Requesting => {
-                column![
+                iced::widget::column![
                     text("Insert GAMESTICK ...")
                     .vertical_alignment(iced::alignment::Vertical::Center)
                     .horizontal_alignment(iced::alignment::Horizontal::Center)
@@ -252,9 +252,9 @@ impl Application for Os {
             State::Loading => {
                 let nearby_games = self.get_nearby_games();
                 // use a column: a simple vertical layout
-                column![  
+                iced::widget::column![  
                     // display the game's in a row      
-                    row![
+                    iced::widget::row![
                         // game appear on the LHS
                         match nearby_games[0] { Some(g) => { Container::new(g.draw(false)) } None => { Container::new(Game::blank()) } },
                         // the middle index (`1`) is the selected game
