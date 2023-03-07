@@ -66,8 +66,8 @@ jobs:
             rustc --version --verbose
             ldd --version
             echo ${PWD}
-            cargo t --release --features rpi
-            cargo b --release --features rpi
+            CARGO_NET_GIT_FETCH_WITH_CLI=true cargo t --release --features rpi
+            CARGO_NET_GIT_FETCH_WITH_CLI=true cargo b --release --features rpi
             cp ./target/release/goco "/artifacts/goco"
 
       - name: Show the artifact
