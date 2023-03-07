@@ -17,9 +17,12 @@ use iced::Settings;
 #[cfg(feature = "rpi")]
 fn init_rpi() {
     println!("Initializing GPIO ...");
-    if let Error(e) = gpio::configure() {
-        eprintln!("{}", e)
-    }
+    match gpio::configure() {
+        Ok(_) => (),
+        Err(e) => {
+            eprintln!("{}", e);
+        }
+    };
 }
 
 pub fn go() -> u8 {
