@@ -14,6 +14,10 @@ use crate::engine::Engine;
 use crate::game::Game;
 use crate::gamestick::GameStick;
 
+#[cfg(feature = "rpi")]
+use crate::gpio::Io;
+
+
 // model the state of the application
 #[derive(Debug, PartialEq)]
 pub struct Os {
@@ -27,6 +31,9 @@ pub struct Os {
     count: usize,
     /// Track the application's state.
     state: State,
+    /// Store the state of the IO interface.
+    #[cfg(feature = "rpi")]
+    io: Io,
 }
 
 #[derive(Debug, PartialEq)]
@@ -34,7 +41,7 @@ enum State {
     /// Request the user to insert a game drive.
     Requesting,
     /// Read games from the game drive.
-    Loading
+    Loading,
 }
 
 impl Os {
@@ -42,17 +49,29 @@ impl Os {
     /// 
     /// Also immediately checks if a [GameStick] is entered to load games without initial delay.
     pub fn new() -> Self {
+        // configure the Pi's IO
+        #[cfg(feature = "rpi")]
+        let io = match Io::configure() {
+            Ok(r) => r,
+            Err(e) => {
+                panic!("{}", e);
+            }
+        };
+
         let mut os = Self {
             engine: Engine::new(),
             drive: GameStick::new(),
             library: Vec::new(),
             count: 0,
             state: State::Requesting,
+            #[cfg(feature = "rpi")]
+            io: io,
         };
         // check if game stick is already inserted on application start
         if os.drive.exists() == true {
             os.initialize_library();
         }
+        
         os
     }
 
@@ -76,6 +95,9 @@ impl Os {
         result
     }
 
+    /// Increments the library's index by 1 only if that index value exists (< length).
+    /// 
+    /// Returns `true` if the count was successfully incremented.
     fn shift_shelf_right(&mut self) -> bool {
         // cap at len()-1
         let able_to_shift = self.count + 1 < self.library.len();
@@ -85,6 +107,9 @@ impl Os {
         able_to_shift
     }
 
+    /// Decrements the library's index by 1 only if that index value exists (>= 1).
+    /// 
+    /// Returns `true` if the count was successfully decremented.
     fn shift_shelf_left(&mut self) -> bool {
         let able_to_shift = self.count >= 1;
         // cap at 0
@@ -127,10 +152,62 @@ impl Os {
         }
     }
 
+    /// Triggers the underlying operating system into 'suspend' mode. Before
+    /// issuing the command, the power LED will be turned off. If the command
+    /// fails, then the power LED status will be restored.
+    /// 
+    /// Suspend stops operation of all applications and puts the machine into 
+    /// a low-power mode. Various triggers can resume the machine, among them 
+    /// pressing a key or quickly pressing and releasing the power button.
+    #[cfg(feature = "rpi")]
+    fn suspend_system(&mut self) -> () {
+        self.io.disable_pwr_led();
+        match std::process::Command::new("systemctl")
+            .arg("suspend")
+            .spawn()
+        {
+            Ok(_) => (),
+            // restore the power LED status if the command failed
+            Err(_) => self.io.enable_pwr_led(),
+        }
+    }
+
+    /// Invokes a command to quit the godot game engine process to essentially
+    /// "return home".
+    fn quit_game(&self) -> () {
+        todo!()
+    }
+
     /// Invokes the engine to run the game at index `count` in the loaded game library.
+    /// 
+    /// The Godot game engine is called to spawn a new process.
     fn select_game(&self) {
         // guaranteed to have `count` as a valid index for game library vector
         self.engine.play_game(self.library.get(self.count).unwrap());
+    }
+
+    /// Checks if the gamestick is available on the filesystem and changes the
+    /// pin's level accordingly.
+    /// 
+    /// - Gamestick filesystem exists: LED = `on`
+    /// - Gamestick filesytem does not exist: LED = `off`
+    #[cfg(feature = "rpi")]
+    fn update_gamestick_led(&mut self) {
+        match self.drive.exists() {
+            true => self.io.enable_gsk_led(),
+            false => self.io.disable_gsk_led(),
+        }
+    }
+
+    /// Checks if the current system is in power-saving mode and changes the
+    /// pin's level accordingly.
+    /// 
+    /// - Full-power mode: LED = `on`
+    /// - Low-power mode: LED = `off`
+    #[cfg(feature = "rpi")]
+    fn update_power_led(&mut self) {
+        // if the application is running then the power pin must be enabled
+        self.io.enable_pwr_led();
     }
 }
 
@@ -140,6 +217,7 @@ pub enum Message {
     EventOccurred(Event),
     ScanDrive(Instant),
     PlayGame,
+    UpdateIo(Instant),
 }
 
 impl Application for Os {
@@ -223,14 +301,26 @@ impl Application for Os {
             Message::EventOccurred(Event::Window(window::Event::CloseRequested)) => {
                 window::close()
             }
-            _ => Command::none()
+            Message::EventOccurred(_) => {
+                Command::none()
+            }
+            // handle updating IO pins
+            Message::UpdateIo(_) => {
+                println!("info: Refreshing IO ...");
+                #[cfg(feature = "rpi")]
+                self.update_gamestick_led();
+                #[cfg(feature = "rpi")]
+                self.update_power_led();
+                Command::none()
+            }
         }
     }
 
     fn subscription(&self) -> Subscription<Message> {
         Subscription::batch(vec![
             subscription::events().map(Message::EventOccurred),
-            time::every(Duration::from_millis(1000)).map(Message::ScanDrive)
+            time::every(Duration::from_millis(500)).map(Message::UpdateIo),
+            time::every(Duration::from_millis(1000)).map(Message::ScanDrive),
         ])
     }
 

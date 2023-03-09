@@ -31,7 +31,7 @@ impl Engine {
             .spawn()
         {
             Ok(_) => (),
-            Err(_) => panic!("failed to load game"),
+            Err(e) => eprintln!("error: {}", e),
         }
     }
 }

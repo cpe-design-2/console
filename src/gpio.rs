@@ -1,24 +1,58 @@
 use std::error::Error;
-use std::thread;
-use std::time::Duration;
 
 use rppal::gpio::Gpio;
 use rppal::system::DeviceInfo;
+use rppal::gpio::{OutputPin, InputPin};
 
-// Gpio uses BCM pin numbering. BCM GPIO 23 is tied to physical pin 16.
-const GPIO_LED: u8 = 23;
+// @note: Gpio uses BCM pin numbering. BCM GPIO 23 is tied to physical pin 16.
 
-pub fn configure() -> Result<(), Box<dyn Error>> {
-    println!("Blinking an LED on a {}.", DeviceInfo::new()?.model());
+/// BCM GPIO pin responsible for indicating the power-on state vs. sleep state.
+const GPIO_PWR_PIN: u8 = 23;
+/// BCM GPIO pin responsible for the gamestick visibility.
+const GPIO_GSK_PIN: u8 = 24;
 
-    let mut pin = Gpio::new()?.get(GPIO_LED)?.into_output();
+#[derive(Debug, PartialEq)]
+pub struct Io {
+    pwr_led: OutputPin,
+    gsk_led: OutputPin,
+}
 
-    // Blink the LED by setting the pin's logic level high for 500 ms.
-    pin.set_low();
-    thread::sleep(Duration::from_millis(500));
-    pin.set_high();
+impl Io {
+    /// Initializes the GPIO pins for corresponding input/output modes.
+    pub fn configure() -> Result<Self, Box<dyn Error>> {
+        println!("info: Initializing GPIO on a {} ...", DeviceInfo::new()?.model());
+        // define the interface pin directions
+        let mut io = Self {
+            pwr_led: Gpio::new()?.get(GPIO_PWR_PIN)?.into_output(),
+            gsk_led: Gpio::new()?.get(GPIO_GSK_PIN)?.into_output(),
+        };
+        // the application is running so tell the user the power is on
+        io.pwr_led.set_high();
+        // the application has not yet had the chance 
+        io.gsk_led.set_low();
 
-    Ok(())
+        Ok(io)
+    }
+
+    /// Sets the Gamestick visibility LED to `on`.
+    pub fn enable_gsk_led(&mut self) {
+        self.gsk_led.set_high();
+    }
+
+    /// Sets the Gamestick visibility LED to `off`.
+    pub fn disable_gsk_led(&mut self) {
+        self.gsk_led.set_low();
+    }
+
+    /// Sets the power state LED to `on`.
+    pub fn enable_pwr_led(&mut self) {
+        self.pwr_led.set_high();
+    }
+
+    /// Sets the power state LED to `off`.
+    pub fn disable_pwr_led(&mut self) {
+        self.pwr_led.set_low();
+    }
 }
 
 

@@ -14,28 +14,15 @@ use std::path::PathBuf;
 
 use iced::Settings;
 
-#[cfg(feature = "rpi")]
-fn init_rpi() {
-    println!("Initializing GPIO ...");
-    match gpio::configure() {
-        Ok(_) => (),
-        Err(e) => {
-            eprintln!("{}", e);
-        }
-    };
-}
-
 pub fn go() -> u8 {
-    #[cfg(feature = "rpi")]
-    init_rpi();
-    println!("Booting up GOCO ...");
+    println!("info: Booting up GOCO ...");
     match Os::run(Settings {
             exit_on_close_request: false,
             ..Settings::default()
         }) {
             Ok(_) => 0,
             Err(e) => {
-                eprintln!("{}", e);
+                eprintln!("error: {}", e);
                 101
             }
     }
