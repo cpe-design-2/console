@@ -54,7 +54,8 @@ impl Os {
         let io = match Io::configure() {
             Ok(r) => r,
             Err(e) => {
-                panic!("{}", e);
+                eprintln!("error: {}", e);
+                Io::new()
             }
         };
 
@@ -381,7 +382,7 @@ mod test {
             library: GameStick::load(&PathBuf::from(format!("{}/testenv/GAMESTICK", env!("CARGO_MANIFEST_DIR")))),
             count: 0,
             #[cfg(feature = "rpi")]
-            io: Io::configure().unwrap(),
+            io: Io::new(),
         };
         {
             let shelf = os.get_nearby_games();
