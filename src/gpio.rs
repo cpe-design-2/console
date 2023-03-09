@@ -2,9 +2,20 @@ use std::error::Error;
 
 use rppal::gpio::Gpio;
 use rppal::system::DeviceInfo;
-use rppal::gpio::{OutputPin, InputPin};
+use rppal::gpio::{OutputPin, InputPin, Trigger};
 
 // @note: Gpio uses BCM pin numbering. BCM GPIO 23 is tied to physical pin 16.
+
+// input pins
+
+/// BCM GPIO pin responsible for killing the godot process (home button).
+const GPIO_HOME_BTN: u8 = 27;
+/// BCM GPIO pin responsible for toggling between sleep and power-on state (power button).
+const GPIO_POWER_BTN: u8 = 22;
+/// BCM GPIO pin responsible for ejecting the gamestick (eject button).
+const GPIO_EJECT_BTN: u8 = 25;
+
+// outputs pins
 
 /// BCM GPIO pin responsible for indicating the power-on state vs. sleep state.
 const GPIO_PWR_PIN: u8 = 23;
@@ -18,8 +29,9 @@ const GPIO_GSK_PIN: u8 = 24;
 
 // Inputs
 // ------
-// - button to exit a game (kill godot process)
-// - button to toggle between sleep and power-on states
+// - button to exit a game (kill godot process) (HOME BUTTON)
+// - button to toggle between sleep and power-on states (POWER BUTTON)
+// - button to eject gamestick (EJECT BUTTON)
 // - knob with resistor ladder for ADC for volume control
 
 /// Abstraction layer to allow for pins to be untied/unused in code without causing
@@ -57,6 +69,9 @@ impl Pin {
 pub struct Io {
     pwr_led: Pin,
     gsk_led: Pin,
+    eject_btn: Pin,
+    home_btn: Pin,
+    power_btn: Pin,
 }
 
 impl Io {
@@ -65,6 +80,9 @@ impl Io {
         Self {
             pwr_led: Pin::Untied,
             gsk_led: Pin::Untied,
+            eject_btn: Pin::Untied,
+            home_btn: Pin::Untied,
+            power_btn: Pin::Untied,
         }
     }
 
@@ -75,13 +93,26 @@ impl Io {
         let mut io = Self {
             pwr_led: Pin::Output(Gpio::new()?.get(GPIO_PWR_PIN)?.into_output()),
             gsk_led: Pin::Output(Gpio::new()?.get(GPIO_GSK_PIN)?.into_output()),
+            // configure the button inputs with the internal pull-up resistors
+            eject_btn: Pin::Input(Gpio::new()?.get(GPIO_EJECT_BTN)?.into_input_pullup()),
+            home_btn: Pin::Input(Gpio::new()?.get(GPIO_HOME_BTN)?.into_input_pullup()),
+            power_btn: Pin::Input(Gpio::new()?.get(GPIO_POWER_BTN)?.into_input_pullup()),
         };
         // the application is running so tell the user the power is on
         io.pwr_led.set_high();
         // the application has not yet had the chance 
         io.gsk_led.set_low();
+
+        // set the asynchronous interrupts for input pins
+        io.eject_btn.set_async_interrupt(Trigger::FallingEdge, Self::eject_callback);
+
         // return the interface
         Ok(io)
+    }
+
+
+    fn eject_callback() -> () {
+        println!("eject button pressed!");
     }
 
     /// Sets the Gamestick visibility LED to `on`.
