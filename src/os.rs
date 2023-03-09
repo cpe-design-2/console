@@ -380,6 +380,8 @@ mod test {
             engine: Engine::new(),
             library: GameStick::load(&PathBuf::from(format!("{}/testenv/GAMESTICK", env!("CARGO_MANIFEST_DIR")))),
             count: 0,
+            #[cfg(feature = "rpi")]
+            io: Io::configure().unwrap(),
         };
         {
             let shelf = os.get_nearby_games();
