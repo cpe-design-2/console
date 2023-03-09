@@ -22,14 +22,9 @@ const GPIO_GSK_PIN: u8 = 24;
 // - button to toggle between sleep and power-on states
 // - knob with resistor ladder for ADC for volume control
 
-#[derive(Debug, PartialEq)]
-pub struct Io {
-    pwr_led: Pin,
-    gsk_led: Pin,
-}
-
 /// Abstraction layer to allow for pins to be untied/unused in code without causing
 /// errors.
+#[derive(Debug, PartialEq)]
 enum Pin {
     Output(OutputPin),
     Input(InputPin),
@@ -56,6 +51,12 @@ impl Pin {
             _ => (),
         }
     }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Io {
+    pwr_led: Pin,
+    gsk_led: Pin,
 }
 
 impl Io {
