@@ -105,7 +105,7 @@ impl Application for Events {
             Message::Exit => window::close(),
             Message::Play => {
                 println!("play game!");
-                let gd = Engine::new();
+                let mut gd = Engine::new();
                 gd.play_game(&Game::new(PathBuf::from("./testenv/GAMESTICK/fsm.pck")));
                 Command::none()
             }

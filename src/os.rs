@@ -175,14 +175,14 @@ impl Os {
 
     /// Invokes a command to quit the godot game engine process to essentially
     /// "return home".
-    fn quit_game(&self) -> () {
-        todo!()
+    fn quit_game(&mut self) -> () {
+        let _success = self.engine.kill_game();
     }
 
     /// Invokes the engine to run the game at index `count` in the loaded game library.
     /// 
     /// The Godot game engine is called to spawn a new process.
-    fn select_game(&self) {
+    fn select_game(&mut self) {
         // guaranteed to have `count` as a valid index for game library vector
         self.engine.play_game(self.library.get(self.count).unwrap());
     }

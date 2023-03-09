@@ -116,6 +116,7 @@ impl Io {
             home_btn: Pin::Input(Gpio::new()?.get(GPIO_HOME_BTN)?.into_input_pullup()),
             power_btn: Pin::Input(Gpio::new()?.get(GPIO_POWER_BTN)?.into_input_pullup()),
         };
+        
         // the application is running so tell the user the power is on
         io.pwr_led.set_high();
         // the application has not yet had the chance 
@@ -123,6 +124,8 @@ impl Io {
 
         // set the asynchronous interrupts for input pins
         io.eject_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::eject_callback);
+        io.home_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::home_callback);
+        io.power_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::power_callback);
 
         // return the interface
         Ok(io)
@@ -131,6 +134,18 @@ impl Io {
     fn eject_callback(level: Level) -> () {
         if level == Level::Low {
             println!("eject button pressed!");
+        }
+    }
+
+    fn power_callback(level: Level) -> () {
+        if level == Level::Low {
+            println!("power button pressed!");
+        }
+    }
+
+    fn home_callback(level: Level) -> () {
+        if level == Level::Low {
+            println!("home button pressed!");
         }
     }
 
