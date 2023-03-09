@@ -2,7 +2,7 @@ use std::error::Error;
 
 use rppal::gpio::Gpio;
 use rppal::system::DeviceInfo;
-use rppal::gpio::{OutputPin, InputPin, Trigger};
+use rppal::gpio::{OutputPin, InputPin, Trigger, Level};
 
 // @note: Gpio uses BCM pin numbering. BCM GPIO 23 is tied to physical pin 16.
 
@@ -63,6 +63,24 @@ impl Pin {
             _ => (),
         }
     }
+
+    /// Accesses the internal [InputPin] of the Pin. Panics if used on a pin
+    /// not configured as an input.
+    fn as_input_pin(&self) -> &InputPin {
+        match self {
+            Self::Input(p) => p,
+            _ => panic!("pin {:?} cannot be accessed as input pin", self),
+        }
+    }
+
+    /// Accesses the internal [InputPin] of the Pin. Panics if used on a pin
+    /// not configured as an input.
+    fn as_input_pin_mut(&mut self) -> &mut InputPin {
+        match self {
+            Self::Input(p) => p,
+            _ => panic!("pin {:?} cannot be accessed as input pin", self),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -104,15 +122,16 @@ impl Io {
         io.gsk_led.set_low();
 
         // set the asynchronous interrupts for input pins
-        io.eject_btn.set_async_interrupt(Trigger::FallingEdge, Self::eject_callback);
+        io.eject_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::eject_callback);
 
         // return the interface
         Ok(io)
     }
 
-
-    fn eject_callback() -> () {
-        println!("eject button pressed!");
+    fn eject_callback(level: Level) -> () {
+        if level == Level::Low {
+            println!("eject button pressed!");
+        }
     }
 
     /// Sets the Gamestick visibility LED to `on`.
