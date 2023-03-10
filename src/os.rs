@@ -179,6 +179,7 @@ impl Os {
 
     /// Invokes a command to quit the godot game engine process to essentially
     /// "return home".
+    #[cfg(feature = "rpi")]
     fn quit_game(&mut self) -> bool {
         self.engine.kill_game()
     }
@@ -328,13 +329,13 @@ impl Application for Os {
             }
             // handle updating IO pins
             Message::UpdateIo(_) => {
-                println!("info: Refreshing IO ...");
                 #[cfg(feature = "rpi")]
-                self.update_gamestick_led();
-                #[cfg(feature = "rpi")]
-                self.update_power_led();
-                #[cfg(feature = "rpi")]
-                self.update_inputs();
+                {
+                    println!("info: Refreshing IO ...");
+                    self.update_gamestick_led();
+                    self.update_power_led();
+                    self.update_inputs();
+                }
                 Command::none()
             }
         }

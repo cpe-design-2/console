@@ -68,6 +68,7 @@ impl Engine {
     }
 
     /// Kills the currently owned game process and clears the child id.
+    #[cfg(feature = "rpi")]
     pub fn kill_game(&mut self) -> bool {
         if self.is_in_game() == true {
             match std::process::Command::new("kill")
