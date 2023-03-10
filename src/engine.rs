@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::env;
 use crate::game::Game;
 
@@ -31,20 +33,28 @@ impl Engine {
     /// invoke a game if no child process is found.
     pub fn play_game(&mut self, game: &Game) -> () {
         if self.is_in_game() == false {
-            match std::process::Command::new(&self.exe)
-                .arg("--fullscreen")
-                .arg("--always-on-top")
-                .arg("--main-pack")
-                .arg(game.get_pck())
-                .spawn()
-            {
-                // store the child's ID for future usage
-                Ok(child) => {
-                    self.child = Some(child.id());
+            // check if the executable exists
+            match Path::new(&self.exe).is_file() {
+                false => {
+                    eprintln!("error: Godot executable path {:?} does not exist", self.exe);
                 }
-                Err(e) => {
-                    eprintln!("error: {}", e);
-                },
+                true => {
+                    match std::process::Command::new(&self.exe)
+                        .arg("--fullscreen")
+                        .arg("--always-on-top")
+                        .arg("--main-pack")
+                        .arg(game.get_pck())
+                        .spawn()
+                    {
+                        // store the child's ID for future usage
+                        Ok(child) => {
+                            self.child = Some(child.id());
+                        }
+                        Err(e) => {
+                            eprintln!("error: {}", e);
+                        },
+                    }
+                }
             }
         } else {
             eprintln!("error: game is already being played on process ID {}", self.child.unwrap());
