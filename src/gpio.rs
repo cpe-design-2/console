@@ -4,6 +4,8 @@ use rppal::gpio::Gpio;
 use rppal::system::DeviceInfo;
 use rppal::gpio::{OutputPin, InputPin, Trigger, Level};
 
+use std::sync::atomic::{AtomicBool, Ordering};
+
 // @note: Gpio uses BCM pin numbering. BCM GPIO 23 is tied to physical pin 16.
 
 // input pins
@@ -21,6 +23,11 @@ const GPIO_EJECT_BTN: u8 = 25;
 const GPIO_PWR_PIN: u8 = 23;
 /// BCM GPIO pin responsible for the gamestick visibility.
 const GPIO_GSK_PIN: u8 = 24;
+
+// global statics to be handled by the asynchronous button inputs and the main goco process
+static IS_HOME_TRIGGERED: AtomicBool = AtomicBool::new(false);
+static IS_POWER_TRIGGERED: AtomicBool = AtomicBool::new(false);
+static IS_EJECT_TRIGGERED: AtomicBool = AtomicBool::new(false);
 
 // Outputs
 // -------
@@ -61,15 +68,6 @@ impl Pin {
         match self {
             Self::Output(p) => p.set_low(),
             _ => (),
-        }
-    }
-
-    /// Accesses the internal [InputPin] of the Pin. Panics if used on a pin
-    /// not configured as an input.
-    fn as_input_pin(&self) -> &InputPin {
-        match self {
-            Self::Input(p) => p,
-            _ => panic!("pin {:?} cannot be accessed as input pin", self),
         }
     }
 
@@ -123,29 +121,35 @@ impl Io {
         io.gsk_led.set_low();
 
         // set the asynchronous interrupts for input pins
-        io.eject_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::eject_callback);
-        io.home_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::home_callback);
-        io.power_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::power_callback);
+        io.eject_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::eject_callback)?;
+        io.home_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::home_callback)?;
+        io.power_btn.as_input_pin_mut().set_async_interrupt(Trigger::FallingEdge, Self::power_callback)?;
 
         // return the interface
         Ok(io)
     }
 
+    /// Sets the atomic variable to `true` for a eject button press.
     fn eject_callback(level: Level) -> () {
         if level == Level::Low {
-            println!("eject button pressed!");
+            IS_EJECT_TRIGGERED.store(true, Ordering::SeqCst);
+            // println!("eject button pressed!");
         }
     }
 
+    /// Sets the atomic variable to `true` for a power button press.
     fn power_callback(level: Level) -> () {
         if level == Level::Low {
-            println!("power button pressed!");
+            IS_POWER_TRIGGERED.store(true, Ordering::SeqCst);
+            // println!("power button pressed!");
         }
     }
 
+    /// Sets the atomic variable to `true` for a home button press.
     fn home_callback(level: Level) -> () {
         if level == Level::Low {
-            println!("home button pressed!");
+            IS_HOME_TRIGGERED.store(true, Ordering::SeqCst);
+            // println!("home button pressed!");
         }
     }
 
@@ -167,5 +171,35 @@ impl Io {
     /// Sets the power state LED to `off`.
     pub fn disable_pwr_led(&mut self) {
         self.pwr_led.set_low();
+    }
+
+    /// Returns the value stored in the atomic variable and clears it if set.
+    pub fn check_power_triggered(&self) -> bool {
+        let result: bool = IS_POWER_TRIGGERED.load(Ordering::SeqCst);
+        // clear the flag if it was raised (unhandled)
+        if result == true {
+            IS_POWER_TRIGGERED.store(false, Ordering::SeqCst);
+        }
+        result
+    }
+
+    /// Returns the value stored in the atomic variable and clears it if set.
+    pub fn check_eject_triggered(&self) -> bool {
+        let result: bool = IS_EJECT_TRIGGERED.load(Ordering::SeqCst);
+        // clear the flag if it was raised (unhandled)
+        if result == true {
+            IS_EJECT_TRIGGERED.store(false, Ordering::SeqCst);
+        }
+        result
+    }
+
+    /// Returns the value stored in the atomic variable and clears it if set.
+    pub fn check_home_triggered(&self) -> bool {
+        let result: bool = IS_HOME_TRIGGERED.load(Ordering::SeqCst);
+        // clear the flag if it was raised (unhandled)
+        if result == true {
+            IS_HOME_TRIGGERED.store(false, Ordering::SeqCst);
+        }
+        result
     }
 }

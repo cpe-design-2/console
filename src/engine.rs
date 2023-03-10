@@ -74,12 +74,8 @@ impl Engine {
                 .arg(&self.child.unwrap().to_string())
                 .spawn() 
             {
-                Ok(_) => {
-                    self.child = None;
-                },
-                Err(e) => {
-                    eprintln!("error: {}", e)
-                }
+                Ok(_) => self.child = None,
+                Err(e) => eprintln!("error: {}", e),
             }   
         }
         true

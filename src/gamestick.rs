@@ -100,10 +100,14 @@ impl GameStick {
                 // successfully ejected
                 Ok(_) => true,
                 // failed to eject
-                Err(_) => false,
+                Err(e) => {
+                    eprintln!("error: {}", e);
+                    false
+                },
             }
         // not available to eject
         } else {
+            eprintln!("error: The drive is not available to eject");
             false
         }
     }

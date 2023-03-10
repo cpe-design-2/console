@@ -161,22 +161,26 @@ impl Os {
     /// a low-power mode. Various triggers can resume the machine, among them 
     /// pressing a key or quickly pressing and releasing the power button.
     #[cfg(feature = "rpi")]
-    fn suspend_system(&mut self) -> () {
+    fn suspend_system(&mut self) -> bool {
         self.io.disable_pwr_led();
         match std::process::Command::new("systemctl")
             .arg("suspend")
             .spawn()
         {
-            Ok(_) => (),
+            Ok(_) => true,
             // restore the power LED status if the command failed
-            Err(_) => self.io.enable_pwr_led(),
+            Err(e) => {
+                eprintln!("error: {}", e);
+                self.io.enable_pwr_led();
+                false
+            },
         }
     }
 
     /// Invokes a command to quit the godot game engine process to essentially
     /// "return home".
-    fn quit_game(&mut self) -> () {
-        let _success = self.engine.kill_game();
+    fn quit_game(&mut self) -> bool {
+        self.engine.kill_game()
     }
 
     /// Invokes the engine to run the game at index `count` in the loaded game library.
@@ -209,6 +213,23 @@ impl Os {
     fn update_power_led(&mut self) {
         // if the application is running then the power pin must be enabled
         self.io.enable_pwr_led();
+    }
+
+    /// Reads the stored data for the input buttons to call certain functionality.
+    #[cfg(feature = "rpi")]
+    fn update_inputs(&mut self) {
+        // remove the drive from the filesystem
+        if self.io.check_eject_triggered() == true {
+            let _ = self.remove_drive();
+        }
+        // send the system in sleep state
+        if self.io.check_power_triggered() == true {
+            let _ = self.suspend_system();
+        }
+        // return to the home screen (quit Godot process)
+        if self.io.check_home_triggered() == true {
+            let _ = self.quit_game();
+        }
     }
 }
 
@@ -312,6 +333,8 @@ impl Application for Os {
                 self.update_gamestick_led();
                 #[cfg(feature = "rpi")]
                 self.update_power_led();
+                #[cfg(feature = "rpi")]
+                self.update_inputs();
                 Command::none()
             }
         }
