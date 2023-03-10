@@ -161,10 +161,11 @@ impl Os {
     /// a low-power mode. Various triggers can resume the machine, among them 
     /// pressing a key or quickly pressing and releasing the power button.
     #[cfg(feature = "rpi")]
-    fn suspend_system(&mut self) -> bool {
+    fn power_down(&mut self) -> bool {
         self.io.disable_pwr_led();
-        match std::process::Command::new("systemctl")
-            .arg("suspend")
+        match std::process::Command::new("shutdown")
+            .arg("-h")
+            .arg("now")
             .spawn()
         {
             Ok(_) => true,
@@ -223,13 +224,13 @@ impl Os {
         if self.io.check_eject_triggered() == true {
             let _ = self.remove_drive();
         }
-        // send the system in sleep state
-        if self.io.check_power_triggered() == true {
-            let _ = self.suspend_system();
-        }
         // return to the home screen (quit Godot process)
         if self.io.check_home_triggered() == true {
             let _ = self.quit_game();
+        }
+        // send the system in sleep state
+        if self.io.check_power_triggered() == true {
+            let _ = self.power_down();
         }
     }
 }

@@ -10,10 +10,14 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 // input pins
 
+/// BCM GPIO pin responsible for toggling between sleep and power-on state (power button).
+/// 
+/// Note the power button must be connected to GPIO3 (pin 5- SCL line).
+/// 
+/// Source: https://howchoo.com/g/mwnlytk3zmm/how-to-add-a-power-button-to-your-raspberry-pi
+const GPIO_POWER_BTN: u8 = 3;
 /// BCM GPIO pin responsible for killing the godot process (home button).
 const GPIO_HOME_BTN: u8 = 27;
-/// BCM GPIO pin responsible for toggling between sleep and power-on state (power button).
-const GPIO_POWER_BTN: u8 = 22;
 /// BCM GPIO pin responsible for ejecting the gamestick (eject button).
 const GPIO_EJECT_BTN: u8 = 25;
 
