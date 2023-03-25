@@ -55,12 +55,30 @@ At a minimum, the following tools and software are required to get the applicati
 - The Rust programming language
 - Cargo package manager
 
+## User Guide
+
+Supported games are built using Godot version 3.5.1. The games must be specified in .pck format, and an optional icon can be set matching the same file name as the .pck file under the .png image format.
+
+Once the Goco application is running, insert the a USB drive with under the name "GAMESTICK". The dirve is searched on the local host computer and recursively finds all the .pck files to load as the game library.
+
+The game library can be navigated by sending 'A' keys to traverse left, and 'D' keys to traverse right. Sending a 'SPACE' key will enter the currently selected game. Sending 'E' key will eject the currently inserted "GAMESTICK" USB drive.
+
+### Using a RasberryPi System
+
+The Goco application is best suited to be ran on a RaspberryPi computer. An additional circuit is connected to the RaspberryPi's GPIO pins for extended functionality not available on a standard personal computer. See the configuration image [here](./docs/RPI-CIRCUIT.png) for the setup. The buttons are configured from left to right as: power button, home button, and eject button. The leftmost LED (green) signals that the system is currently in the POWER state when illuminated. The rightmost LED (yellow) signals that the system detects a USB drive as "GAMESTICK" on the current computer.
+
+The power button has the ability to put the system into a sleep state or power state. When the green LED is illuminated, the system is in POWER state. When the LED is off, the system is in the SLEEP state.
+
+The home button has the ability to send a subprocess command to kill the currently running Godot game engine process. This will return focus to the Goco application if the Godot engine is open. If the Godot engine is not running, there would be no effect.
+
+The eject button has the ability to send a subprocess command to unmount the filesystem drive for the USB drive. When the yellow LED is on, the system detects the USB drive named "GAMESTICK". Pressing the button will remove the drive from the filesystem and set the yellow LED to off.
+
 ## Limitations
 
 1. The OpenGL backend is not supported for rendering images on Linux machines for the `iced` crate. This currently prevents properly displaying PNG images for targets that choose to render with the OpenGL backend.
  
 Roadblocks encountered:
-- failed to compile Vulkan (alternate WGPU_BACKEND) for RaspberryPi OS. See these projects and forums: ([rpi-vk-driver/issues](https://github.com/Yours3lf/rpi-vk-driver/issues/6), [vulkan-loader](https://github.com/KhronosGroup/Vulkan-Loader), [vulkan-header](https://github.com/KhronosGroup/Vulkan-Headers/blob/main/BUILD.md).
+- failed to compile Vulkan (alternate WGPU_BACKEND) for RaspberryPi OS. See these projects and forums: [rpi-vk-driver/issues](https://github.com/Yours3lf/rpi-vk-driver/issues/6), [vulkan-loader](https://github.com/KhronosGroup/Vulkan-Loader), [vulkan-header](https://github.com/KhronosGroup/Vulkan-Headers/blob/main/BUILD.md).
 
 2. Currently, only the standard version of Godot is supported. The mono version is still under construction in getting a Godot Mono binary compiled for the targeted hardware.
 
