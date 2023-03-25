@@ -311,8 +311,9 @@ impl Application for Os {
                                 KeyCode::W => { },
                                 // action key (spacebar)
                                 KeyCode::Space => { self.select_game(); }
-                                // @todo: replace with external signal from RPI to eject the drive
-                                KeyCode::Q => { self.remove_drive(); }
+                                // allow the user to eject the drive using the 'E' key
+                                #[cfg(not(feature = "rpi"))]
+                                KeyCode::E => { self.remove_drive(); }
                                 _ => (),
                             }
                         }
