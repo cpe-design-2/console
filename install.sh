@@ -115,6 +115,15 @@ chmod +x $GOCO_ROOT/start.sh
 echo "@bash $GOCO_ROOT/start.sh" >> .config/lxsession/LXDE-pi/autostart
 
 
+# 4a) MODIFY THE SPLASH SCREEN
+# ----------------------------
+
+# save the previous splash screen as backup
+sudo mv /usr/share/plymouth/themes/pix/splash.png /usr/share/plymouth/themes/pix/splash.png.bk
+# write the new static image as the splash screen with name "splash.png"
+sudo cp $GOCO_ROOT/boot/logo-static-boot.png /usr/share/plymouth/themes/pix/splash.png
+
+
 # 5) REBOOT THE SYSTEM FOR CHANGES TO TAKE EFFECT
 # -----------------------------------------------
 
