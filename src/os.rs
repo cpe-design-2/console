@@ -13,10 +13,10 @@ use iced::widget::text;
 use crate::engine::Engine;
 use crate::game::Game;
 use crate::gamestick::GameStick;
+use crate::animator::Animation;
 
 #[cfg(feature = "rpi")]
 use crate::gpio::Io;
-
 
 // model the state of the application
 #[derive(Debug, PartialEq)]
@@ -34,6 +34,8 @@ pub struct Os {
     /// Store the state of the IO interface.
     #[cfg(feature = "rpi")]
     io: Io,
+    /// Create an attribute for the animation player
+    insert_animation: Animation,
 }
 
 #[derive(Debug, PartialEq)]
@@ -65,6 +67,7 @@ impl Os {
             library: Vec::new(),
             count: 0,
             state: State::Requesting,
+            insert_animation: Animation::new(),
             #[cfg(feature = "rpi")]
             io: io,
         };
@@ -277,6 +280,7 @@ impl Application for Os {
                             self.initialize_library();
                         } else {
                             println!("info: Scanning for GAMESTICK at directory: {:?}", self.drive.get_path());
+                            self.insert_animation.next();
                         }
                     }
                     State::Loading => {
@@ -287,7 +291,6 @@ impl Application for Os {
                         }
                     }
                 }
-
                 Command::none()
             }
             // handle event to enter a game
@@ -355,14 +358,15 @@ impl Application for Os {
         match self.state {
             State::Requesting => {
                 iced::widget::column![
-                    text("Insert GAMESTICK ...")
+                    text(self.insert_animation.get_text())
                     .vertical_alignment(iced::alignment::Vertical::Center)
-                    .horizontal_alignment(iced::alignment::Horizontal::Center)
+                    .horizontal_alignment(iced::alignment::Horizontal::Center),
+                    self.insert_animation.draw()
                 ]
                 .padding(128)
                 .width(Length::Fill)
                 .height(Length::Fill)
-                .spacing(64)
+                .spacing(20)
                 .align_items(Alignment::Center)
                 .into()
             },
@@ -403,6 +407,7 @@ mod test {
     fn it_load_nearby_games() {
         let mut os = Os {
             drive: GameStick::new(),
+            insert_animation: Animation::new(),
             state: State::Requesting,
             engine: Engine::new(),
             library: GameStick::load(&PathBuf::from(format!("{}/testenv/GAMESTICK", env!("CARGO_MANIFEST_DIR")))),
