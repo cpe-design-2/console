@@ -1,10 +1,13 @@
 
 use iced::Alignment;
-use iced::widget::{Column, image, text, container, Image};
+use iced::widget::{Column, image, text, container};
 
 use crate::os::Message;
 use std::env;
 use std::path::PathBuf;
+
+use iced::widget::image::Handle;
+use iced::Length;
 
 use crate::env::GOCO_ROOT;
 
@@ -21,8 +24,8 @@ const IMAGE_FRAMES: usize = 2;
 impl Animation {
 
     pub fn new() -> Self {
-        let i0 = std::fs::read("./assets/a1.png").unwrap();
-        let i1 = std::fs::read("./assets/a2.png").unwrap();
+        let i0 = std::fs::read(Self::get_image(1)).unwrap_or(Vec::new());
+        let i1 = std::fs::read(Self::get_image(2)).unwrap_or(Vec::new());
         Self {
             text_index: 0,
             image_index: 0,
@@ -69,9 +72,6 @@ impl Animation {
     }
 }
 
-use iced::widget::image::Handle;
-use iced::Length;
-
 impl<'a> Animation {
     pub fn container(title: Option<&str>) -> Column<'a, Message> {
         match title {
@@ -83,7 +83,6 @@ impl<'a> Animation {
     /// Assembles the container to display an empty slot for a [Game] in the console's main library screen.
     /// The function returns a blank icon and no text, but in the same format as a valid game would be.
     pub fn draw(&self) -> Column<'a, Message> {
-        let img: Image = image(Handle::from_memory(self.get_current_frame().clone()));
         Self::container(None)
             .push(
                 container(image(Handle::from_memory(self.get_current_frame().clone()))
