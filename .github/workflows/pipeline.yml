@@ -116,6 +116,7 @@ jobs:
           chmod +x ./goco
           cp "./goco" ${{ env.GOCO_PKG_NAME }}/bin/goco
           cp "./assets/empty.png" ${{ env.GOCO_PKG_NAME }}/assets/empty.png
+          cp "./assets/insert.png" ${{ env.GOCO_PKG_NAME }}/assets/insert.png
           cp "./install.sh" ${{ env.GOCO_PKG_NAME }}/install.sh
           cp "./LICENSE" ${{ env.GOCO_PKG_NAME }}/LICENSE
           cp "./assets/boot/logo-dynamic-boot.mov" ${{ env.GOCO_PKG_NAME }}/boot/logo-dynamic-boot.mov

@@ -1,45 +1,26 @@
-
-use iced::Alignment;
-use iced::widget::{Column, image, text, container};
+use iced::{Alignment, Length};
+use iced::widget::{Column, image, text, container, image::Handle};
 
 use crate::os::Message;
-use std::env;
-use std::path::PathBuf;
-
-use iced::widget::image::Handle;
-use iced::Length;
-
 use crate::env::GOCO_ROOT;
+use std::env;
 
 #[derive(Debug, PartialEq)]
 pub struct Animation{
-    image_index: usize,
     text_index: usize,
-    frames: [Vec<u8>; IMAGE_FRAMES as usize],
+    buf: Vec<u8>,
 }
 
 const TEXT_FRAMES: usize = 4;
-const IMAGE_FRAMES: usize = 2;
 
 impl Animation {
 
     pub fn new() -> Self {
-        let i0 = std::fs::read(Self::get_image(1)).unwrap_or(Vec::new());
-        let i1 = std::fs::read(Self::get_image(2)).unwrap_or(Vec::new());
+        let i0 = std::fs::read(format!("{}/assets/insert.png", env::var_os(GOCO_ROOT).unwrap_or(".".into()).to_string_lossy())).unwrap_or(Vec::new());
         Self {
             text_index: 0,
-            image_index: 0,
-            frames: [i0.clone(), i1],
+            buf: i0,
         }
-    }
-
-    /// Returns the console's included gmaestick insertion icon to display when no
-    /// gamestick is detected.
-    /// 
-    /// Reads from the `GOCO_ROOT` environment variable to determine the base directory
-    /// for finding the `assets/insert.gif` file.
-    fn get_image(i: usize) -> PathBuf {
-        PathBuf::from(format!("{}/assets/a{}.png", env::var_os(GOCO_ROOT).unwrap_or(".".into()).to_string_lossy(), i))
     }
 
     pub fn get_text(&self) -> &str {
@@ -55,20 +36,15 @@ impl Animation {
     /// Updates the animator to access the next image.
     pub fn next(&mut self) {
         self.text_index += 1;
-        self.image_index = 0;
         // reset the frame to replay the animation if exceeding last frame count
         if self.text_index >= TEXT_FRAMES {
             self.text_index = 0;
-        }
-        // reset the frame to replay the animation if exceeding last frame count
-        if self.image_index >= IMAGE_FRAMES {
-            self.image_index = 0;
         }
     }
 
     /// Accesses the current frame index.
     fn get_current_frame(&self) -> &Vec<u8> {
-        &self.frames[self.image_index]
+        &self.buf
     }
 }
 
