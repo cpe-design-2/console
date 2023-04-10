@@ -109,13 +109,18 @@ jobs:
           mkdir ${{ env.GOCO_PKG_NAME }}
           mkdir ${{ env.GOCO_PKG_NAME }}/bin
           mkdir ${{ env.GOCO_PKG_NAME }}/assets
+          mkdir ${{ env.GOCO_PKG_NAME }}/boot
 
       - name: Copy contents into package
         run: |
+          chmod +x ./goco
           cp "./goco" ${{ env.GOCO_PKG_NAME }}/bin/goco
-          cp -R "./assets/" ${{ env.GOCO_PKG_NAME }}/assets
+          cp "./assets/empty.png" ${{ env.GOCO_PKG_NAME }}/assets/empty.png
+          cp "./assets/insert.png" ${{ env.GOCO_PKG_NAME }}/assets/insert.png
           cp "./install.sh" ${{ env.GOCO_PKG_NAME }}/install.sh
           cp "./LICENSE" ${{ env.GOCO_PKG_NAME }}/LICENSE
+          cp "./assets/boot/logo-dynamic-boot.mov" ${{ env.GOCO_PKG_NAME }}/boot/logo-dynamic-boot.mov
+          cp "./assets/boot/logo-static-boot.png" ${{ env.GOCO_PKG_NAME }}/boot/logo-static-boot.png
 
       - name: Archive the package
         run: tar -czf ${{ env.GOCO_PKG_NAME }}.zip ${{env.GOCO_PKG_NAME }}

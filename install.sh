@@ -40,7 +40,7 @@ GOCO_ARTIFACT="goco-$GOCO_VERSION-aarch64-linux"
 # ----------------------------
 
 # install dependencis for godot and goco
-sudo apt-get install git build-essential scons pkg-config clang llvm lld libsdl2-dev libgles2-mesa-dev libfontconfig1
+sudo apt-get install -y git build-essential scons pkg-config clang llvm lld libsdl2-dev libgles2-mesa-dev libfontconfig libfontconfig1-dev mesa-utils vlc
 
 # download the zipped source code
 curl -LO https://github.com/godotengine/godot/archive/refs/tags/$GODOT_VERSION.zip
@@ -99,13 +99,29 @@ cp /etc/xdg/lxsession/LXDE-pi/autostart .config/lxsession/LXDE-pi/
 touch $GOCO_ROOT/start.sh
 echo "# This script is called by the operating system during startup.
 export GOCO_ROOT=\"$GOCO_ROOT\"
-export GOCO_GODOT_PATH=\"$GOCO_ROOT/bin/godot.frt.opt.llvm\"
+export GOCO_GODOT_PATH=\"\$GOCO_ROOT/bin/godot.frt.opt.llvm\"
 
+# run the boot-video using VLC
+cvlc --rate=0.6 \$GOCO_ROOT/boot/logo-dynamic-boot.mov &
+
+# wait for the animation to run before starting the goco application
+sleep 9s
+
+# start the console application
 \$GOCO_ROOT/bin/goco" > $GOCO_ROOT/start.sh
 
 # add the command to run the console application on start-up when rebooted
 chmod +x $GOCO_ROOT/start.sh
 echo "@bash $GOCO_ROOT/start.sh" >> .config/lxsession/LXDE-pi/autostart
+
+
+# 4a) MODIFY THE SPLASH SCREEN
+# ----------------------------
+
+# save the previous splash screen as backup
+sudo mv /usr/share/plymouth/themes/pix/splash.png /usr/share/plymouth/themes/pix/splash.png.bk
+# write the new static image as the splash screen with name "splash.png"
+sudo cp $GOCO_ROOT/boot/logo-static-boot.png /usr/share/plymouth/themes/pix/splash.png
 
 
 # 5) REBOOT THE SYSTEM FOR CHANGES TO TAKE EFFECT

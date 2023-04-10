@@ -3,6 +3,7 @@ mod env;
 mod game;
 mod gamestick;
 mod os;
+mod animator;
 
 #[cfg(feature = "rpi")]
 mod gpio;
