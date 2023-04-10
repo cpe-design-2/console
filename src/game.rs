@@ -2,7 +2,6 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 
-use iced::Length;
 use iced::Alignment;
 use iced::widget::{Column, image, text, container};
 
@@ -91,8 +90,8 @@ impl<'a> Game {
         Self::container(None)
             .push(
                 container(image(Self::empty_icon())
-                .width(Length::Units(ICON_SIZE))
-                .height(Length::Units(ICON_SIZE)))
+                .width(ICON_SIZE)
+                .height(ICON_SIZE))
                 .center_x()         
             )
             .push(
@@ -110,8 +109,8 @@ impl<'a> Game {
             .push(
                 container(
                     image(self.get_icon_path().unwrap_or(Self::empty_icon()))
-                    .width(Length::Units((ICON_SIZE as f32 * if selected == true { 1.5 } else { 1.0 }) as u16))
-                    .height(Length::Units((ICON_SIZE as f32 * if selected == true { 1.5 } else { 1.0 }) as u16))
+                    .width((ICON_SIZE as f32 * if selected == true { 1.5 } else { 1.0 }) as u16)
+                    .height((ICON_SIZE as f32 * if selected == true { 1.5 } else { 1.0 }) as u16)
                 ).center_x()
             )
             .push(

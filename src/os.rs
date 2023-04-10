@@ -256,7 +256,7 @@ impl Application for Os {
             // determine at run-time the full-screen mode
             match std::env::var(crate::env::GOCO_NO_FULLSCREEN) {
                 Ok(_) => Command::none(),
-                Err(_) => iced::window::set_mode::<Message>(window::Mode::Fullscreen),
+                Err(_) => iced::window::change_mode::<Message>(window::Mode::Fullscreen),
             },
         )
     }
@@ -369,7 +369,7 @@ impl Application for Os {
             State::Loading => {
                 let nearby_games = self.get_nearby_games();
                 // use a column: a simple vertical layout
-                iced::widget::column![  
+                iced::widget::column![
                     // display the game's in a row      
                     iced::widget::row![
                         // game appear on the LHS
@@ -383,7 +383,7 @@ impl Application for Os {
                     button("PLAY").on_press(Message::PlayGame),
                 ]
                 .padding(32)
-                .width(Length::Fill)
+                // .width(Length::Fill)
                 .height(Length::Fill)
                 .spacing(64)
                 .align_items(Alignment::Center)
