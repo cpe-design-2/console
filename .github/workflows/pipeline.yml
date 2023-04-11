@@ -119,8 +119,8 @@ jobs:
           cp "./assets/insert.png" ${{ env.GOCO_PKG_NAME }}/assets/insert.png
           cp "./install.sh" ${{ env.GOCO_PKG_NAME }}/install.sh
           cp "./LICENSE" ${{ env.GOCO_PKG_NAME }}/LICENSE
-          cp "./assets/boot/logo-dynamic-boot.mov" ${{ env.GOCO_PKG_NAME }}/boot/logo-dynamic-boot.mov
-          cp "./assets/boot/logo-static-boot.png" ${{ env.GOCO_PKG_NAME }}/boot/logo-static-boot.png
+          cp "./assets/boot/logo.mp4" ${{ env.GOCO_PKG_NAME }}/boot/logo.mp4
+          cp "./assets/boot/logo.png" ${{ env.GOCO_PKG_NAME }}/boot/logo.png
 
       - name: Archive the package
         run: tar -czf ${{ env.GOCO_PKG_NAME }}.zip ${{env.GOCO_PKG_NAME }}
