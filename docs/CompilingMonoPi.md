@@ -14,6 +14,10 @@ One [forum](https://github.com/utmapp/UTM/issues/4827) suggests using QEMU by it
 
 On the Linux virtualized instance, we followed this [tutorial](https://azeria-labs.com/emulate-raspberry-pi-with-qemu/) from Azeria Labs to get the RaspberryPi OS successfully running.
 
+## Future Work
+
+Investigate [DietPi](https://dietpi.com/docs/hardware/#utm) with UTM.
+
 ## Troubleshooting
 
 To get Ubuntu desktop working for the ARM machine, the following links helped workaround common issues:
