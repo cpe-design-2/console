@@ -84,3 +84,6 @@ Roadblocks encountered:
 
 Roadblocks encountered:
 - extremely long compile times for the temporary Godot mono binary
+
+3. Gamepad/Joystick event detection is not supported in the `iced` crate. See the documentation for missing event types: [docs](https://docs.rs/iced/0.8.0/iced/enum.Event.html).
+
