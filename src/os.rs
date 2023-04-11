@@ -387,7 +387,7 @@ impl Application for Os {
                     button("PLAY").on_press(Message::PlayGame),
                 ]
                 .padding(32)
-                // .width(Length::Fill)
+                .width(Length::Fill)
                 .height(Length::Fill)
                 .spacing(64)
                 .align_items(Alignment::Center)
