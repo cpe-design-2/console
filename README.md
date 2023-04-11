@@ -65,7 +65,9 @@ The game library can be navigated by sending 'A' keys to traverse left, and 'D' 
 
 ### Using a RasberryPi System
 
-The Goco application is best suited to be ran on a RaspberryPi computer. An additional circuit is connected to the RaspberryPi's GPIO pins for extended functionality not available on a standard personal computer. See the configuration image [here](./docs/RPI-CIRCUIT.png) for the setup. The buttons are configured from left to right as: power button, home button, and eject button. The leftmost LED (green) signals that the system is currently in the POWER state when illuminated. The rightmost LED (yellow) signals that the system detects a USB drive as "GAMESTICK" on the current computer.
+The Goco application is best suited to be ran on a RaspberryPi computer. An additional circuit is connected to the RaspberryPi's GPIO pins for extended functionality not available on a standard personal computer. See the configuration image [here](./docs/RPI-CIRCUIT.png) for the setup. 
+
+The buttons are configured from left to right as: power button, home button, and eject button. The leftmost LED (green) signals that the system is currently in the POWER state when illuminated. The rightmost LED (yellow) signals that the system detects a USB drive as "GAMESTICK" on the current computer.
 
 The power button has the ability to put the system into a sleep state or power state. When the green LED is illuminated, the system is in POWER state. When the LED is off, the system is in the SLEEP state.
 
