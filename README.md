@@ -82,10 +82,15 @@ The eject button has the ability to send a subprocess command to unmount the fil
 Roadblocks encountered:
 - failed to compile Vulkan (alternate WGPU_BACKEND) for RaspberryPi OS. See these projects and forums: [rpi-vk-driver/issues](https://github.com/Yours3lf/rpi-vk-driver/issues/6), [vulkan-loader](https://github.com/KhronosGroup/Vulkan-Loader), [vulkan-header](https://github.com/KhronosGroup/Vulkan-Headers/blob/main/BUILD.md).
 
-2. Currently, only the standard version of Godot is supported. The mono version is still under construction in getting a Godot Mono binary compiled for the targeted hardware.
+2. Currently, only the standard version of Godot is supported. The mono version is still under construction in getting a Godot Mono binary compiled for the targeted hardware. See the report for the failed attempts on compiling for Godot Mono [here](./docs/CompilingMonoPi.md)
 
 Roadblocks encountered:
 - extremely long compile times for the temporary Godot mono binary
 
 3. Gamepad/Joystick event detection is not supported in the `iced` crate. See the documentation for missing event types: [docs](https://docs.rs/iced/0.8.0/iced/enum.Event.html).
 
+## Lessons and Notes
+
+This project is largely coded in the Rust programming language. Rust is still a fairly new but promising language compared to languages in its domain such as C++. Due to its relative infancy, a lot of crates are still being produced to catch up to the level of C++ library maturity. Rust also has a steep learning curve, which can discourage future development and onboarding developers. However, Rust's build system can be considered very nice to work with as this application used GitHub Actions to automate the process of compiling this application for the Raspberry Pi hardware. It is very easy and encouraging to write unit tests and compile programs across multiple platforms.
+
+With all these points in mind, it is important to look back and evaluate the project's progress and the decisions made along the way. This project, like all others, is an experiment. Experimentation is still encouraged and will always be benefitted from, whether it be in a different language with mature frameworks, or selecting different GUI crates with Rust, or continuing to move forward with the current project's state.
